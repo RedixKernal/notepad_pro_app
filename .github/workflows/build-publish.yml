@@ -50,6 +50,27 @@ jobs:
         run: ./gradlew.bat jpackage
         shell: cmd
 
+      - name: Sign Installer
+        run: |
+          if ("${{ secrets.CERTIFICATE_BASE64 }}" -ne "") {
+            Write-Host "Decoding certificate from secrets..."
+            $pfxPath = "RedixSystems.pfx"
+            [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String("${{ secrets.CERTIFICATE_BASE64 }}"))
+            
+            $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($pfxPath, "${{ secrets.CERTIFICATE_PASSWORD }}")
+            
+            $installers = Get-ChildItem -Path "build/jpackage" -Include "*.msi", "*.exe" -Recurse
+            foreach ($installer in $installers) {
+              Write-Host "Signing $($installer.FullName)..."
+              Set-AuthenticodeSignature -FilePath $installer.FullName -Certificate $cert -HashAlgorithm SHA256
+            }
+            # Clean up the certificate file
+            Remove-Item -Path $pfxPath -Force
+          } else {
+            Write-Host "CERTIFICATE_BASE64 secret not found. Skipping code signing."
+          }
+        shell: powershell
+
       - name: Get Version and Installer Path
         id: get_info
         run: |
