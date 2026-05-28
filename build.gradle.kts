@@ -43,10 +43,12 @@ jlink {
         name = "Notepad_Pro"
     }
     jpackage {
-        if (org.gradle.internal.os.OperatingSystem.current().isWindows) {
-            val type = project.findProperty("installerType")?.toString() ?: "msi"
+        val os = org.gradle.internal.os.OperatingSystem.current()
+        val type = project.findProperty("installerType")?.toString() ?: if (os.isWindows) "msi" else if (os.isMacOsX) "dmg" else "deb"
+        installerType = type
+        
+        if (os.isWindows) {
             val iconPath = project.file("src/main/resources/com/ravi/notesapp/app_icon.ico").absolutePath
-            installerType = type
             imageOptions = listOf("--icon", iconPath)
             installerOptions = mutableListOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "Redix Systems").apply {
                 if (type == "exe") {
@@ -54,6 +56,16 @@ jlink {
                     add(iconPath)
                 }
             }.toList()
+        } else if (os.isMacOsX) {
+            installerOptions = listOf("--vendor", "Redix Systems", "--mac-package-name", "Notepad_Pro")
+            val icnsFile = project.file("src/main/resources/com/ravi/notesapp/app_icon.icns")
+            if (icnsFile.exists()) {
+                imageOptions = listOf("--icon", icnsFile.absolutePath)
+            }
+        } else if (os.isLinux) {
+            val pngPath = project.file("src/main/resources/com/ravi/notesapp/app_icon.png").absolutePath
+            imageOptions = listOf("--icon", pngPath)
+            installerOptions = listOf("--linux-shortcut", "--linux-menu-group", "Utility", "--vendor", "Redix Systems")
         }
     }
 }
