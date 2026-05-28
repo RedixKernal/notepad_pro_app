@@ -7,7 +7,6 @@ build/
 *.iml
 *.ipr
 *.iws
-.vscode/
 bin/
 out/
 .project
