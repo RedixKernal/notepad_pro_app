@@ -1,20 +1,20 @@
 {
   "projectName": "Notepad_Pro",
   "version": "0.1.0",
-  "releaseDate": "2026-05-27T14:14:40Z",
+  "releaseDate": "2026-05-28T07:09:13Z",
   "installers": [
     {
       "fileName": "Notepad_Pro-0.1.0.msi",
       "format": "msi",
-      "sha256": "28e3e8b12ce8307beb2de5c9a05f7b7e549f30accbfd3793823586dd44cdab71",
-      "fileSize": "37.26 MB"
+      "sha256": "459aaf0d15858e42685e0634913146df742cc211fe4f87245c49b2d20ec0ca27",
+      "fileSize": "37.27 MB"
     }
 ,
     {
       "fileName": "Notepad_Pro-0.1.0.exe",
       "format": "exe",
-      "sha256": "90a481421d2b2dcf490ec3376da56cef2c1e8d5ebb35c9445d2a57aca8eec73f",
-      "fileSize": "37.89 MB"
+      "sha256": "a22544c4ae4ae59c0185997658a9395e1dab0a47a0dcf8bc9b80e2df5bb1287e",
+      "fileSize": "37.90 MB"
     }
   ]
 }
