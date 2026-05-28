@@ -59,7 +59,7 @@ jobs:
             
             $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($pfxPath, "${{ secrets.CERTIFICATE_PASSWORD }}")
             
-            $installers = Get-ChildItem -Path "build/jpackage" -Include "*.msi", "*.exe" -Recurse
+            $installers = Get-ChildItem -Path "build/jpackage" -File | Where-Object { $_.Extension -eq '.msi' -or $_.Extension -eq '.exe' }
             foreach ($installer in $installers) {
               Write-Host "Signing $($installer.FullName)..."
               Set-AuthenticodeSignature -FilePath $installer.FullName -Certificate $cert -HashAlgorithm SHA256
