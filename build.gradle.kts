@@ -37,7 +37,7 @@ application {
 }
 
 jlink {
-    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages", "--bind-services"))
+    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages", "--add-modules", "jdk.crypto.ec,jdk.crypto.mscapi,jdk.crypto.cryptoki,java.net.http"))
     addExtraDependencies("javafx")
     launcher {
         name = "Notepad_Pro"
