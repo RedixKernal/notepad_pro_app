@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.ravi.notesapp.controller.PaletteController"
+      styleClass="palette-popup" spacing="5">
+    
+    <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+
+    <TextField fx:id="searchField" promptText="Type a file name to open..."
+               styleClass="palette-search"
+               onKeyReleased="#onSearchKeyReleased"/>
+               
+    <ListView fx:id="resultList" VBox.vgrow="ALWAYS" styleClass="palette-list"
+              onMouseClicked="#onListClicked"/>
+</VBox>

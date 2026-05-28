@@ -1,0 +1,87 @@
+name: Build and Publish Installer
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags, e.g. v1.0.0
+  workflow_dispatch: # Enable manual triggers
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Release MSI
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up WiX Toolset
+        run: |
+          # WiX Toolset comes pre-installed on GitHub Actions Windows runners,
+          # but we verify and add it to the path if necessary.
+          if (Get-Command candle -ErrorAction SilentlyContinue) {
+            Write-Host "WiX is already in the system PATH"
+          } else {
+            # Standard installation path on windows-latest runner
+            $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+            if (Test-Path $wixPath) {
+              Write-Host "Adding WiX to path: $wixPath"
+              echo "$wixPath" >> $env:GITHUB_PATH
+            } else {
+              Write-Error "WiX Toolset not found on runner."
+            }
+          }
+        shell: powershell
+
+      - name: Run Build and Package Installer
+        run: ./gradlew.bat jpackage
+        shell: cmd
+
+      - name: Get Version and Installer Path
+        id: get_info
+        run: |
+          # Parse version from gradle.properties or build.gradle.kts
+          $gradleFile = Get-Content -Path build.gradle.kts -Raw
+          $version = "1.0.0"
+          if ($gradleFile -match 'version\s*=\s*"([^"]+)"') {
+              $version = $Matches[1]
+          }
+          $appName = "Notepad_ProApp"
+          if ($gradleFile -match 'launcher\s*\{\s*name\s*=\s*"([^"]+)"') {
+              $appName = $Matches[1]
+          }
+          $installerPath = "build/jpackage/${appName}-${version}.msi"
+          
+          Write-Host "AppName: $appName"
+          Write-Host "Version: $version"
+          Write-Host "Installer Path: $installerPath"
+          
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "installer_path=$installerPath" >> $env:GITHUB_OUTPUT
+          echo "installer_name=${appName}-${version}.msi" >> $env:GITHUB_OUTPUT
+        shell: powershell
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ steps.get_info.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            ${{ steps.get_info.outputs.installer_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

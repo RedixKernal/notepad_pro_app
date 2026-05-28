@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ravi.notesapp.controller.EditorController" styleClass="editor-panel">
+
+    <!-- In-file search bar (initially hidden) -->
+    <HBox fx:id="findBar" styleClass="find-bar" spacing="6" alignment="CENTER_LEFT" managed="false" visible="false">
+        <padding>
+            <Insets top="5" right="8" bottom="5" left="8"/>
+        </padding>
+        <Label text="Find:" styleClass="find-label"/>
+        <TextField fx:id="findField" promptText="Search in file…" styleClass="find-field" prefWidth="220" onKeyReleased="#onFindKeyReleased"/>
+        <CheckBox fx:id="chkCaseSensitive" text="Aa" styleClass="find-check" onAction="#onFindCaseSensitiveChanged"/>
+        <Label fx:id="lblMatchCount" text="" styleClass="match-count"/>
+        <Button fx:id="btnFindPrev" text="▲" styleClass="icon-btn" onAction="#onFindPrev"/>
+        <Button fx:id="btnFindNext" text="▼" styleClass="icon-btn" onAction="#onFindNext"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnCloseFind" text="✕" styleClass="icon-btn" onAction="#onCloseFind"/>
+    </HBox>
+
+    <!-- SplitPane to separate editor area from the console -->
+    <SplitPane fx:id="editorSplitPane" orientation="VERTICAL" VBox.vgrow="ALWAYS" styleClass="editor-split">
+        <!-- StackPane wrapper to prevent visual layout recalculation passes -->
+        <StackPane minHeight="0">
+            <!-- Tab pane -->
+            <TabPane fx:id="tabPane" styleClass="editor-tabs" tabClosingPolicy="ALL_TABS"/>
+
+            <!-- Welcome / empty state -->
+            <StackPane fx:id="welcomePane" styleClass="welcome-pane">
+                <VBox alignment="CENTER" spacing="28" styleClass="welcome-container">
+                    <padding>
+                        <Insets top="40" right="40" bottom="40" left="40"/>
+                    </padding>
+
+                    <!-- Header Branding -->
+                    <VBox alignment="CENTER" spacing="8">
+                        <Label text="📝" styleClass="welcome-logo"/>
+                        <Label text="Notepad_Pro" styleClass="welcome-title"/>
+                        <Label text="A fast, modern note-taking editor" styleClass="welcome-subtitle"/>
+                    </VBox>
+
+                    <!-- Content Grid (Start Actions & Shortcuts) -->
+                    <HBox alignment="CENTER" spacing="48" styleClass="welcome-grid" maxWidth="500">
+                        <!-- Column 1: Start Actions -->
+                        <VBox spacing="12" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" styleClass="welcome-column">
+                            <Label text="Start" styleClass="welcome-section-header"/>
+                            <Button text="📂  Open Folder..." onAction="#onOpenFolderFromWelcome" styleClass="welcome-action-link"/>
+                        </VBox>
+
+                        <Separator orientation="VERTICAL" styleClass="welcome-divider"/>
+
+                        <!-- Column 2: Shortcuts Cheat Sheet -->
+                        <VBox spacing="10" alignment="TOP_LEFT" HBox.hgrow="ALWAYS" styleClass="welcome-column">
+                            <Label text="Shortcuts" styleClass="welcome-section-header"/>
+                            <HBox spacing="16" alignment="CENTER_LEFT" styleClass="welcome-shortcut-row">
+                                <Label text="Toggle Sidebar" styleClass="welcome-shortcut-desc"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Ctrl + B" styleClass="welcome-shortcut-key"/>
+                            </HBox>
+                            <HBox spacing="16" alignment="CENTER_LEFT" styleClass="welcome-shortcut-row">
+                                <Label text="Save File" styleClass="welcome-shortcut-desc"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Ctrl + S" styleClass="welcome-shortcut-key"/>
+                            </HBox>
+                            <HBox spacing="16" alignment="CENTER_LEFT" styleClass="welcome-shortcut-row">
+                                <Label text="Find in File" styleClass="welcome-shortcut-desc"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Ctrl + F" styleClass="welcome-shortcut-key"/>
+                            </HBox>
+                            <HBox spacing="16" alignment="CENTER_LEFT" styleClass="welcome-shortcut-row">
+                                <Label text="Toggle Theme" styleClass="welcome-shortcut-desc"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Ctrl+Shift+T" styleClass="welcome-shortcut-key"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </StackPane>
+        </StackPane>
+
+        <!-- Console Panel -->
+        <VBox fx:id="consolePane" styleClass="console-panel" minHeight="0">
+            <HBox fx:id="consoleHeader" styleClass="console-header" spacing="10" alignment="CENTER_LEFT" onMousePressed="#onConsoleHeaderPressed" onMouseDragged="#onConsoleHeaderDragged">
+                <padding>
+                    <Insets top="5" right="8" bottom="5" left="8"/>
+                </padding>
+                <Label text="Output" styleClass="console-title" style="-fx-font-weight: bold;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Clear" onAction="#onClearConsole" styleClass="icon-btn"/>
+                <Button text="✕" onAction="#onCloseConsole" styleClass="icon-btn"/>
+            </HBox>
+            <TextArea fx:id="consoleOutput" editable="false" wrapText="true" VBox.vgrow="ALWAYS" styleClass="console-text-area"/>
+        </VBox>
+    </SplitPane>
+
+</VBox>

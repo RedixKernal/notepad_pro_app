@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ravi.notesapp.controller.ExplorerController" styleClass="explorer-panel" minWidth="160" prefWidth="260">
+
+    <!-- Header -->
+    <!-- <HBox styleClass="explorer-header" alignment="CENTER_LEFT" spacing="6">
+        <padding><Insets top="8" right="8" bottom="8" left="10"/></padding>
+        <Label text="EXPLORER" styleClass="panel-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnCollapseAll" text="⊟" styleClass="icon-btn" onAction="#onCollapseAll"/>
+    </HBox> -->
+
+    <!-- Search bar (file search) -->
+    <HBox styleClass="search-box" spacing="4" alignment="CENTER">
+        <padding>
+            <Insets top="4" right="6" bottom="4" left="6"/>
+        </padding>
+        <!-- <ToggleButton fx:id="btnToggleTree" text="📂" styleClass="icon-btn" selected="true" onAction="#onToggleTree">
+            <tooltip><Tooltip text="Hide File Tree"/></tooltip>
+        </ToggleButton> -->
+        <TextField fx:id="searchField" promptText="🔍  Filter files…" styleClass="search-field" HBox.hgrow="ALWAYS" onKeyReleased="#onSearchKeyReleased"/>
+        <Button fx:id="btnClearSearch" text="✕" styleClass="icon-btn" onAction="#onClearSearch"/>
+    </HBox>
+
+    <!-- File tree -->
+    <TreeView fx:id="fileTree" styleClass="file-tree" VBox.vgrow="ALWAYS" onMouseClicked="#onTreeClick" onKeyReleased="#onTreeKeyReleased"/>
+
+    <!-- Recent folders label (shows when no folder open) -->
+    <VBox fx:id="recentPanel" styleClass="recent-panel" spacing="0">
+        <Label text="RECENT FOLDERS" styleClass="panel-title" style="-fx-padding: 8 10 4 10;"/>
+        <ListView fx:id="recentList" styleClass="recent-list" prefHeight="160" onMouseClicked="#onRecentClick"/>
+    </VBox>
+
+</VBox>
