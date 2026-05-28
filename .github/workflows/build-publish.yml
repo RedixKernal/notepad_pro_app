@@ -19,8 +19,6 @@ jobs:
         include:
           - os: windows-latest
             arch: x64
-          - os: windows-latest
-            arch: x86
           - os: macos-latest
             arch: x64
           - os: ubuntu-latest
@@ -91,15 +89,6 @@ jobs:
           }
         shell: powershell
 
-      - name: Rename x86 Installer (Windows x86 only)
-        if: runner.os == 'Windows' && matrix.arch == 'x86'
-        run: |
-          $installers = Get-ChildItem -Path "build/jpackage" -File | Where-Object { $_.Extension -eq '.msi' -or $_.Extension -eq '.exe' }
-          foreach ($installer in $installers) {
-            $newName = $installer.Name.Replace(".msi", "-x86.msi").Replace(".exe", "-x86.exe")
-            Rename-Item -Path $installer.FullName -NewName $newName
-          }
-        shell: powershell
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.ravi.notesapp"
-version = "0.1.3"
+version = "1.0.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
