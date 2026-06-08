@@ -16,7 +16,7 @@ fi
 
 VERSION=$(grep -E 'version[[:space:]]*=[[:space:]]*"[^"]+"' "$GRADLE_FILE" | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
 if [ -z "$VERSION" ]; then
-    VERSION="1.0.0"
+    VERSION="2.0.0"
 fi
 
 APP_NAME="Notepad_Pro"

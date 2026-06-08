@@ -22,6 +22,8 @@ public class AIChatController implements Initializable {
     private javafx.scene.layout.VBox chatBox;
     @FXML
     private TextArea promptArea;
+    @FXML
+    private Button sendBtn;
 
     private MainController mainController;
     private final AiService aiService = new AiService();
@@ -38,16 +40,30 @@ public class AIChatController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        chatScroll.setFitToWidth(true);
+        
         chatBox.heightProperty().addListener((obs, oldVal, newVal) -> {
             if (isAutoScrolling) {
+                chatScroll.layout();
                 chatScroll.setVvalue(1.0);
             }
         });
 
-        chatScroll.vvalueProperty().addListener((obs, oldVal, newVal) -> {
-            if (chatScroll.getVmax() > 0 && newVal.doubleValue() < chatScroll.getVmax() - 0.05) {
+        // Detect manual user scroll up
+        chatScroll.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, evt -> {
+            if (evt.getDeltaY() > 0) { // Scrolling UP
                 isAutoScrolling = false;
-            } else if (newVal.doubleValue() >= chatScroll.getVmax() - 0.01) {
+            }
+        });
+
+        // Detect user grabbing scrollbar
+        chatScroll.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, evt -> {
+            isAutoScrolling = false;
+        });
+
+        // Re-enable auto-scroll if user reaches bottom
+        chatScroll.vvalueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.doubleValue() >= chatScroll.getVmax() - 0.01) {
                 isAutoScrolling = true;
             }
         });
@@ -138,6 +154,7 @@ public class AIChatController implements Initializable {
         if (query.isEmpty())
             return;
 
+        isAutoScrolling = true;
         promptArea.clear();
         appendMessage("You:\n" + query);
 
@@ -146,6 +163,10 @@ public class AIChatController implements Initializable {
         String model = mainController.getVm().getSettings().getAiModel();
         String apiKey = mainController.getVm().getSettings().getAiApiKey();
 
+        if (apiUrl == null || apiUrl.isBlank()) apiUrl = AppSettings.DEFAULT_AI_URL;
+        if (model == null || model.isBlank()) model = AppSettings.DEFAULT_AI_MODEL;
+        if (apiKey == null || apiKey.isBlank()) apiKey = AppSettings.getDefaultApiKey();
+
         if (apiKey == null || apiKey.isEmpty()) {
             appendMessage("AI:\nPlease configure your API Key in the settings (⚙ icon).");
             return;
@@ -153,6 +174,8 @@ public class AIChatController implements Initializable {
 
         isAutoScrolling = true;
         inThinkBlock = false;
+        sendBtn.setDisable(true);
+        promptArea.setDisable(true);
         appendMessage("AI:\n[LOADING]");
 
         aiService.askAiStream(apiUrl, model, apiKey, context, query, token -> {
@@ -192,10 +215,18 @@ public class AIChatController implements Initializable {
                 }
             });
         }).thenRun(() -> {
-            Platform.runLater(this::removeLoaderBox);
+            Platform.runLater(() -> {
+                removeLoaderBox();
+                sendBtn.setDisable(false);
+                promptArea.setDisable(false);
+                promptArea.requestFocus();
+            });
         }).exceptionally(throwable -> {
             Platform.runLater(() -> {
                 removeLoaderBox();
+                sendBtn.setDisable(false);
+                promptArea.setDisable(false);
+                promptArea.requestFocus();
                 if (currentAiLabel != null) {
                     currentAiLabel.setText(currentAiLabel.getText() + "\nError: " + throwable.getMessage());
                 }
@@ -233,18 +264,22 @@ public class AIChatController implements Initializable {
         toolbar.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
         toolbar.setMinWidth(0);
 
-        Button copyBtn = new Button("📋");
-        copyBtn.getStyleClass().add("icon-btn-small");
+        javafx.scene.shape.SVGPath copyIcon = new javafx.scene.shape.SVGPath();
+        copyIcon.setContent("M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12V1z");
+        copyIcon.setFill(javafx.scene.paint.Color.web("#a0a0a0"));
+        copyIcon.setScaleX(0.7);
+        copyIcon.setScaleY(0.7);
 
-        if (!isUser) {
-            Button likeBtn = new Button("👍");
-            likeBtn.getStyleClass().add("icon-btn-small");
-            Button dislikeBtn = new Button("👎");
-            dislikeBtn.getStyleClass().add("icon-btn-small");
-            toolbar.getChildren().addAll(copyBtn, likeBtn, dislikeBtn);
-        } else {
-            toolbar.getChildren().add(copyBtn);
-        }
+        javafx.scene.shape.SVGPath tickIcon = new javafx.scene.shape.SVGPath();
+        tickIcon.setContent("M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z");
+        tickIcon.setFill(javafx.scene.paint.Color.web("#4CAF50"));
+        tickIcon.setScaleX(0.9);
+        tickIcon.setScaleY(0.9);
+
+        Button copyBtn = new Button();
+        copyBtn.setGraphic(copyIcon);
+        copyBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
+        toolbar.getChildren().add(copyBtn);
 
         javafx.scene.layout.HBox topRow = new javafx.scene.layout.HBox(headerBox, toolbar);
 
@@ -280,17 +315,18 @@ public class AIChatController implements Initializable {
             currentAiLabel.getStyleClass().add("chat-bubble-text");
             fullCurrentText = "";
 
+            Label thisAiLabel = currentAiLabel;
             copyBtn.setOnAction(evt -> {
                 javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-                content.putString(fullCurrentText);
+                content.putString(thisAiLabel.getText());
                 javafx.scene.input.Clipboard.getSystemClipboard().setContent(content);
-                copyBtn.setText("✔");
+                copyBtn.setGraphic(tickIcon);
                 new Thread(() -> {
                     try {
                         Thread.sleep(2000);
                     } catch (Exception ex) {
                     }
-                    Platform.runLater(() -> copyBtn.setText("📋"));
+                    Platform.runLater(() -> copyBtn.setGraphic(copyIcon));
                 }).start();
             });
 
@@ -303,15 +339,15 @@ public class AIChatController implements Initializable {
 
             copyBtn.setOnAction(evt -> {
                 javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-                content.putString(textContent);
+                content.putString(textLabel.getText());
                 javafx.scene.input.Clipboard.getSystemClipboard().setContent(content);
-                copyBtn.setText("✔");
+                copyBtn.setGraphic(tickIcon);
                 new Thread(() -> {
                     try {
                         Thread.sleep(2000);
                     } catch (Exception ex) {
                     }
-                    Platform.runLater(() -> copyBtn.setText("📋"));
+                    Platform.runLater(() -> copyBtn.setGraphic(copyIcon));
                 }).start();
             });
 
@@ -320,8 +356,9 @@ public class AIChatController implements Initializable {
 
         javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(bubble);
         container.setMinWidth(0);
-        container.prefWidthProperty().bind(chatScroll.widthProperty().subtract(20));
-        container.maxWidthProperty().bind(chatScroll.widthProperty().subtract(20));
+        // Bind to viewport width instead of scroll width to avoid scrollbar layout loops (flickering)
+        container.prefWidthProperty().bind(chatScroll.viewportBoundsProperty().map(bounds -> bounds.getWidth() - 20));
+        container.maxWidthProperty().bind(chatScroll.viewportBoundsProperty().map(bounds -> bounds.getWidth() - 20));
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Platform.runLater(() -> {

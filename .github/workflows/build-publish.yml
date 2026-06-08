@@ -71,21 +71,17 @@ jobs:
       - name: Sign Installer (Windows only)
         if: runner.os == 'Windows'
         run: |
-          if ("${{ secrets.CERTIFICATE_BASE64 }}" -ne "") {
-            Write-Host "Decoding certificate from secrets..."
-            $pfxPath = "RedixSystems.pfx"
-            [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String("${{ secrets.CERTIFICATE_BASE64 }}"))
-            
-            $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($pfxPath, "${{ secrets.CERTIFICATE_PASSWORD }}")
+          $cerPath = "certificate\note_p.cer"
+          if (Test-Path $cerPath) {
+            $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($cerPath)
             
             $installers = Get-ChildItem -Path "build/jpackage" -File | Where-Object { $_.Extension -eq '.msi' -or $_.Extension -eq '.exe' }
             foreach ($installer in $installers) {
               Write-Host "Signing $($installer.FullName)..."
               Set-AuthenticodeSignature -FilePath $installer.FullName -Certificate $cert -HashAlgorithm SHA256
             }
-            Remove-Item -Path $pfxPath -Force
           } else {
-            Write-Host "CERTIFICATE_BASE64 secret not found. Skipping code signing."
+            Write-Host "Certificate file not found at $cerPath. Skipping code signing."
           }
         shell: powershell
 

@@ -37,10 +37,16 @@ public class SettingsService {
 
     private AppSettings load() {
         try {
-            if (!Files.exists(SETTINGS_FILE)) return new AppSettings();
-            String json = Files.readString(SETTINGS_FILE, StandardCharsets.UTF_8);
-            AppSettings loaded = gson.fromJson(json, AppSettings.class);
-            return loaded != null ? loaded : new AppSettings();
+            AppSettings loaded = null;
+            if (Files.exists(SETTINGS_FILE)) {
+                String json = Files.readString(SETTINGS_FILE, StandardCharsets.UTF_8);
+                loaded = gson.fromJson(json, AppSettings.class);
+            }
+            if (loaded == null) {
+                loaded = new AppSettings();
+            }
+            
+            return loaded;
         } catch (IOException e) {
             return new AppSettings();
         }

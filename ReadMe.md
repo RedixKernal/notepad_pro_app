@@ -20,15 +20,18 @@ Before building, ensure the following are installed on your machine:
 An automated script is provided in the project root to run builds:
 
 ### Bash Shell Script (`build.sh`)
+
 Designed for Unix, macOS, Linux, and Windows Git Bash/WSL environments.
 
 **How to run:**
+
 ```bash
 chmod +x build.sh
 ./build.sh
 ```
 
 ### What this script does:
+
 1. **Parse Project Info**: Dynamically read the application name and version from [build.gradle.kts](file:///c:/Users/panthula/Desktop/Nt/build.gradle.kts).
 2. **Prerequisite Check**: Validate that Java (and WiX Toolset on Windows) are installed and accessible.
 3. **Clean & Build**: Execute `./gradlew clean jpackage` to compile code, assemble modules, and compile the installer executable.
@@ -43,16 +46,17 @@ After a successful run, the following files will be created in the `releases/` f
 
 ```
 releases/
-├── Notepad_ProApp-1.0.0.msi        # The Windows MSI installer containing the bundled modular JRE
+├── Notepad_ProApp-2.0.0.msi        # The Windows MSI installer containing the bundled modular JRE
 └── release-manifest.json      # Metadata manifest for the release
 ```
 
 ### Example `release-manifest.json`:
+
 ```json
 {
   "projectName": "Notepad_ProApp",
-  "version": "1.0.0",
-  "fileName": "Notepad_ProApp-1.0.0.msi",
+  "version": "2.0.0",
+  "fileName": "Notepad_ProApp-2.0.0.msi",
   "sha256": "96ad01704b32377d435cea08d971789f1a2eba591df0a86729c409b59dd98e11",
   "releaseDate": "2026-05-26T18:50:01Z",
   "fileSize": "36.96 MB"
@@ -66,8 +70,9 @@ releases/
 A GitHub Actions workflow is provided at [.github/workflows/build-publish.yml](file:///c:/Users/panthula/Desktop/Nt/.github/workflows/build-publish.yml).
 
 ### How it works:
+
 - **Triggers**:
-  - Automatically when you push a version tag matching `v*` (e.g., `git tag v1.0.0` followed by `git push origin v1.0.0`).
+  - Automatically when you push a version tag matching `v*`
   - Manually via the **Run workflow** button in the GitHub Actions tab.
 - **Process**:
   - Spins up a Windows virtual environment.
