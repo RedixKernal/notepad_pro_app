@@ -80,7 +80,11 @@ jobs:
               $installers = Get-ChildItem -Path "build/jpackage" -File | Where-Object { $_.Extension -eq '.msi' -or $_.Extension -eq '.exe' }
               foreach ($installer in $installers) {
                 Write-Host "Signing $($installer.FullName)..."
-                Set-AuthenticodeSignature -FilePath $installer.FullName -Certificate $cert -HashAlgorithm SHA256
+                try {
+                  Set-AuthenticodeSignature -FilePath $installer.FullName -Certificate $cert -HashAlgorithm SHA256 -ErrorAction Stop
+                } catch {
+                  Write-Host "Warning: Failed to sign $($installer.FullName). The certificate may not be suitable for code signing (e.g., missing Code Signing EKU). Skipping..."
+                }
               }
             }
           } else {
