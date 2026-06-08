@@ -146,6 +146,10 @@ public class AIChatController implements Initializable {
         String model = mainController.getVm().getSettings().getAiModel();
         String apiKey = mainController.getVm().getSettings().getAiApiKey();
 
+        if (apiUrl == null || apiUrl.isBlank()) apiUrl = AppSettings.DEFAULT_AI_URL;
+        if (model == null || model.isBlank()) model = AppSettings.DEFAULT_AI_MODEL;
+        if (apiKey == null || apiKey.isBlank()) apiKey = AppSettings.getDefaultApiKey();
+
         if (apiKey == null || apiKey.isEmpty()) {
             appendMessage("AI:\nPlease configure your API Key in the settings (⚙ icon).");
             return;

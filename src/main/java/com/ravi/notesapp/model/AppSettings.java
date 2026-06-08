@@ -11,11 +11,19 @@ public class AppSettings {
     private String lastOpenedFolder = null;
     private boolean autoSave = false;
     private int tabSpace = 2;
-    private String aiProviderUrl = "https://openrouter.ai/api/v1/";
-    private String aiModel = "meta-llama/llama-3.1-8b-instruct:free";
+    public static final String DEFAULT_AI_URL = "https://openrouter.ai/api/v1/";
+    public static final String DEFAULT_AI_MODEL = "openrouter/free";
+    private static final String DEFAULT_AI_KEY_B64 = "c2stb3ItdjEtNjMyNGRkZmJhM2I2N2EyNTRhOGJkZGM2NmRjNThlZTdmZWE4NjY3ZDMwODcyODJhMmJjNGEwY2RmZDdjZjQ4Mw==";
+
+    private String aiProviderUrl = "";
+    private String aiModel = "";
     private String aiApiKey = "";
 
     public AppSettings() {
+    }
+
+    public static String getDefaultApiKey() {
+        return new String(java.util.Base64.getDecoder().decode(DEFAULT_AI_KEY_B64));
     }
 
     public String getTheme() {
