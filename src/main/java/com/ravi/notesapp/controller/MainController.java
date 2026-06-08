@@ -45,7 +45,7 @@ public class MainController implements Initializable {
     EditorController editorPaneController;
     @FXML
     AIChatController aiChatPaneController;
-    
+
     @FXML
     private ToggleButton btnToggleAi;
     @FXML
@@ -73,7 +73,7 @@ public class MainController implements Initializable {
         explorerPaneController.init(vm.getExplorerViewModel(), this);
         editorPaneController.init(vm.getEditorViewModel(), this);
         aiChatPaneController.init(this);
-        
+
         // Hide AI pane initially
         splitPane.getItems().remove(aiChatPane);
 
@@ -90,7 +90,7 @@ public class MainController implements Initializable {
         // Persisted settings
         AppSettings s = vm.getSettings();
         vm.setCurrentTheme(s.getTheme());
-        
+
         if (menuAutoSave != null) {
             menuAutoSave.setSelected(s.isAutoSave());
         }
@@ -273,7 +273,7 @@ public class MainController implements Initializable {
         boolean isAutoSave = menuAutoSave.isSelected();
         vm.getSettings().setAutoSave(isAutoSave);
         vm.setStatusText("Auto Save " + (isAutoSave ? "Enabled" : "Disabled"));
-        
+
         // If enabled, save all currently unsaved files
         if (isAutoSave) {
             onSaveAll(null);
@@ -377,7 +377,8 @@ public class MainController implements Initializable {
 
     @FXML
     void onToggleAi(ActionEvent e) {
-        if (btnToggleAi == null || splitPane == null || aiChatPane == null) return;
+        if (btnToggleAi == null || splitPane == null || aiChatPane == null)
+            return;
         boolean visible = btnToggleAi.isSelected();
         if (visible) {
             if (!splitPane.getItems().contains(aiChatPane)) {
@@ -406,7 +407,7 @@ public class MainController implements Initializable {
     @FXML
     void onAbout(ActionEvent e) {
         DialogUtils.info("About Notepad_Pro",
-                "Notepad_Pro v0.1.0\nA modern file explorer\nBuilt with modern technology\n\n Design and Developed by Redix Systems");
+                "Notepad_Pro v2.0.0\nA modern file explorer\nBuilt with modern technology\n\n Design and Developed by Redix Systems");
     }
 
     // ──────────────── Internal helpers ───────────────────────────────────
