@@ -26,6 +26,10 @@
     <HBox spacing="8" alignment="CENTER" styleClass="chat-input-container">
         <TextArea fx:id="promptArea" promptText="Ask about the active tab... (Shift+Enter for new line)" wrapText="true"
                   prefRowCount="2" HBox.hgrow="ALWAYS" styleClass="chat-input" onKeyPressed="#onPromptKeyPressed"/>
-        <Button text="➤" onAction="#onSend" styleClass="chat-send-btn" minWidth="36" minHeight="36"/>
+        <Button fx:id="sendBtn" onAction="#onSend" styleClass="chat-send-btn icon-btn" minWidth="36" minHeight="36" style="-fx-background-color: transparent; -fx-cursor: hand;">
+            <graphic>
+                <javafx.scene.shape.SVGPath content="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="#007ACC" scaleX="0.8" scaleY="0.8"/>
+            </graphic>
+        </Button>
     </HBox>
 </VBox>
