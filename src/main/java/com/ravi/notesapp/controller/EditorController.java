@@ -751,7 +751,7 @@ public class EditorController implements Initializable {
     // Helpers
     // ─────────────────────────────────────────────────────────────────────
 
-    private CodeArea getActiveCodeArea() {
+    public CodeArea getActiveCodeArea() {
         Tab t = tabPane.getSelectionModel().getSelectedItem();
         if (t == null)
             return null;
@@ -759,6 +759,14 @@ public class EditorController implements Initializable {
             return (CodeArea) ((VirtualizedScrollPane<?>) t.getContent()).getContent();
         }
         return t.getContent() instanceof CodeArea ? (CodeArea) t.getContent() : null;
+    }
+
+    public String getActiveFileContent() {
+        CodeArea area = getActiveCodeArea();
+        if (area != null) {
+            return area.getText();
+        }
+        return "";
     }
 
     private void showWelcome(boolean show) {

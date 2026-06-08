@@ -3,6 +3,7 @@ module notesapp {
     requires javafx.fxml;
     requires javafx.swing;
     requires java.desktop;
+    requires java.net.http;
     requires com.google.gson;
     requires org.fxmisc.richtext;
     requires org.fxmisc.flowless;

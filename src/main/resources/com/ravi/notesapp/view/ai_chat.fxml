@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ravi.notesapp.controller.AIChatController" styleClass="ai-panel" minWidth="240" prefWidth="300">
+
+    <HBox styleClass="explorer-header" alignment="CENTER_LEFT" spacing="6">
+        <padding>
+            <Insets top="8" right="8" bottom="8" left="10"/>
+        </padding>
+        <Label text="AI ASSISTANT" styleClass="panel-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="⚙" styleClass="icon-btn" onAction="#onSettings">
+            <tooltip>
+                <Tooltip text="AI Settings (API Key)"/>
+            </tooltip>
+        </Button>
+    </HBox>
+
+    <ScrollPane fx:id="chatScroll" VBox.vgrow="ALWAYS" fitToWidth="true" hbarPolicy="NEVER" styleClass="chat-scroll" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+        <VBox fx:id="chatBox" spacing="0"/>
+    </ScrollPane>
+
+    <HBox spacing="8" alignment="CENTER" styleClass="chat-input-container">
+        <TextArea fx:id="promptArea" promptText="Ask about the active tab... (Shift+Enter for new line)" wrapText="true"
+                  prefRowCount="2" HBox.hgrow="ALWAYS" styleClass="chat-input" onKeyPressed="#onPromptKeyPressed"/>
+        <Button text="➤" onAction="#onSend" styleClass="chat-send-btn" minWidth="36" minHeight="36"/>
+    </HBox>
+</VBox>

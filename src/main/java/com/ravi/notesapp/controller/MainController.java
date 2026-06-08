@@ -43,6 +43,13 @@ public class MainController implements Initializable {
     ExplorerController explorerPaneController;
     @FXML
     EditorController editorPaneController;
+    @FXML
+    AIChatController aiChatPaneController;
+    
+    @FXML
+    private ToggleButton btnToggleAi;
+    @FXML
+    private javafx.scene.layout.VBox aiChatPane;
 
     // Window dragging offsets
     private double xOffset = 0;
@@ -65,6 +72,10 @@ public class MainController implements Initializable {
         // Wire child controllers
         explorerPaneController.init(vm.getExplorerViewModel(), this);
         editorPaneController.init(vm.getEditorViewModel(), this);
+        aiChatPaneController.init(this);
+        
+        // Hide AI pane initially
+        splitPane.getItems().remove(aiChatPane);
 
         // Initialize and listen to recent folders changes reactively
         updateRecentMenu();
@@ -358,6 +369,27 @@ public class MainController implements Initializable {
                     lastDividerPosition = splitPane.getDividerPositions()[0];
                 }
                 splitPane.getItems().remove(explorerPane);
+            }
+        }
+    }
+
+    private double lastAiDividerPosition = 0.75;
+
+    @FXML
+    void onToggleAi(ActionEvent e) {
+        if (btnToggleAi == null || splitPane == null || aiChatPane == null) return;
+        boolean visible = btnToggleAi.isSelected();
+        if (visible) {
+            if (!splitPane.getItems().contains(aiChatPane)) {
+                splitPane.getItems().add(aiChatPane);
+                splitPane.setDividerPosition(splitPane.getDividers().size() - 1, lastAiDividerPosition);
+            }
+        } else {
+            if (splitPane.getItems().contains(aiChatPane)) {
+                if (splitPane.getDividers().size() > 0) {
+                    lastAiDividerPosition = splitPane.getDividerPositions()[splitPane.getDividers().size() - 1];
+                }
+                splitPane.getItems().remove(aiChatPane);
             }
         }
     }

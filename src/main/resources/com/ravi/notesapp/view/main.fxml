@@ -80,6 +80,14 @@
                         <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8v16z M0 0 H0.01 M24 24 H23.99" styleClass="svg-icon"/>
                     </graphic>
                 </Button>
+                <ToggleButton fx:id="btnToggleAi" onAction="#onToggleAi" styleClass="toolbar-btn">
+                    <tooltip>
+                        <Tooltip text="Toggle AI Assistant"/>
+                    </tooltip>
+                    <graphic>
+                        <SVGPath content="M21 11.5v-1c0-3.04-2.46-5.5-5.5-5.5S10 7.46 10 10.5v1c0 1.22.61 2.3 1.5 2.96V19c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2v-4.54c.89-.66 1.5-1.74 1.5-2.96zm-9-1c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5v1h-7v-1zm5 8.5h-3v-4h3v4z M0 0 H0.01 M24 24 H23.99" styleClass="svg-icon"/>
+                    </graphic>
+                </ToggleButton>
                 <Button fx:id="btnAbout" onAction="#onAbout" styleClass="toolbar-btn">
                     <tooltip>
                         <Tooltip text="About Notepad_Pro"/>
@@ -117,6 +125,9 @@
 
             <!-- RIGHT: Editor panel -->
             <fx:include fx:id="editorPane" source="editor.fxml"/>
+
+            <!-- FAR RIGHT: AI Chat panel -->
+            <fx:include fx:id="aiChatPane" source="ai_chat.fxml"/>
 
         </SplitPane>
     </center>

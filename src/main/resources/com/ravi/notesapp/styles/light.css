@@ -965,3 +965,96 @@
     -fx-shape: " ";
     -fx-padding: 0;
 }
+
+/* ---------------- AI Assistant ----------------------------------------- */
+.ai-panel {
+    -fx-background-color: -bg-panel;
+    -fx-border-color: transparent transparent transparent -border;
+    -fx-border-width: 0 0 0 1;
+}
+
+.chat-list,
+.chat-list:focused {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+}
+
+/* --- AI Chat Modern UI --- */
+.chat-bubble {
+    -fx-padding: 10 14 10 14;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);
+}
+
+.chat-bubble-user {
+    -fx-background-color: -accent-glow;
+    -fx-border-color: rgba(74, 107, 204, 0.2);
+    -fx-border-radius: 14;
+}
+
+.chat-bubble-ai {
+    -fx-background-color: -bg-base;
+    -fx-border-color: -border;
+    -fx-border-radius: 14;
+}
+
+.chat-bubble-text {
+    -fx-text-fill: -text-primary;
+    -fx-font-size: 14px;
+}
+
+.icon-btn-small {
+    -fx-font-size: 14px;
+    -fx-padding: 4 6 4 6;
+    -fx-background-color: transparent;
+    -fx-text-fill: -text-muted;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+}
+.icon-btn-small:hover {
+    -fx-background-color: rgba(0,0,0,0.05);
+    -fx-text-fill: -text-primary;
+}
+
+.chat-input-container {
+    -fx-padding: 8;
+    -fx-background-color: -bg-panel;
+    -fx-border-color: -border transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.chat-input {
+    -fx-control-inner-background: -bg-base;
+    -fx-background-color: -bg-base;
+    -fx-text-fill: -text-primary;
+    -fx-prompt-text-fill: -text-muted;
+    -fx-border-color: -border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 3;
+    -fx-font-size: 14px;
+}
+.chat-input .content {
+    -fx-background-color: transparent;
+}
+.chat-input:focused {
+    -fx-border-color: -accent;
+    -fx-effect: dropshadow(gaussian, rgba(74, 107, 204, 0.2), 10, 0, 0, 0);
+}
+
+.chat-send-btn {
+    -fx-background-color: -accent;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-padding: 6 12 6 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 3, 0, 0, 1);
+}
+.chat-send-btn:hover {
+    -fx-background-color: -accent-bright;
+    -fx-effect: dropshadow(gaussian, rgba(74, 107, 204, 0.4), 5, 0, 0, 1);
+}
