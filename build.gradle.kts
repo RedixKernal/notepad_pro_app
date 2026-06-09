@@ -48,7 +48,8 @@ jlink {
         installerType = type
         
         if (os.isWindows) {
-            // imageOptions = listOf("--icon", iconPath) // Disabled to prevent Side-by-Side configuration error
+            val iconPath = project.file("src/main/resources/com/ravi/notesapp/app_icon.ico").absolutePath
+            imageOptions = listOf("--icon", iconPath)
             installerOptions = listOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "Redix Systems")
         } else if (os.isMacOsX) {
             installerOptions = listOf("--vendor", "Redix Systems", "--mac-package-name", "Notepad_Pro")
