@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <!-- 
+    IMPORTANT: Update these values to match your Microsoft Partner Center Product Identity!
+    Identity Name: This is usually a generated string like "12345MyCompany.MyApp"
+    Publisher: This is the exact Publisher ID, e.g., "CN=A1B2C3D4-E5F6-7890-ABCD-1234567890AB"
+  -->
+  <Identity
+    Name="RedixSystems.NotepadPro"
+    Publisher="CN=Redix Systems"
+    Version="2.0.0.0" />
+
+  <Properties>
+    <DisplayName>Notepad Pro</DisplayName>
+    <PublisherDisplayName>Redix Systems</PublisherDisplayName>
+    <Logo>StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application
+      Id="NotepadPro"
+      Executable="Notepad_Pro.exe"
+      EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Notepad Pro"
+        Description="A professional notepad application."
+        BackgroundColor="transparent"
+        Square150x150Logo="Square150x150Logo.png"
+        Square44x44Logo="Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Wide310x150Logo.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

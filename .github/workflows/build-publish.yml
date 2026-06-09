@@ -58,8 +58,10 @@ jobs:
 
       - name: Run Build and Package Installer (Windows)
         if: runner.os == 'Windows'
-        run: ./gradlew.bat jpackage
-        shell: cmd
+        run: |
+          ./gradlew.bat jpackage
+          ./build-msix.ps1
+        shell: powershell
 
       - name: Run Build and Package Installer (Unix)
         if: runner.os != 'Windows'
@@ -77,6 +79,7 @@ jobs:
           fail_on_unmatched_files: false
           files: |
             build/jpackage/*.msi
+            build/jpackage/*.msix
             build/jpackage/*.dmg
             build/jpackage/*.pkg
             build/jpackage/*.deb
