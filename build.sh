@@ -54,7 +54,7 @@ fi
 # Clean releases folder first
 mkdir -p releases
 rm -f releases/*.msi
-rm -f releases/*.exe
+
 
 # Build and Stage MSI
 echo "Running Gradle clean jpackage (MSI)..."
@@ -62,20 +62,6 @@ $GRADLE_CMD clean jpackage -PinstallerType=msi
 
 echo "Staging MSI to releases folder..."
 for f in build/jpackage/*.msi; do
-    if [ -f "$f" ]; then
-        cp "$f" releases/
-        echo "Staged installer to: releases/$(basename "$f")"
-
-    fi
-done
-echo ""
-echo "..."
-# Build and Stage EXE
-echo "Running Gradle clean jpackage (EXE)..."
-$GRADLE_CMD clean jpackage -PinstallerType=exe
-
-echo "Staging EXE to releases folder..."
-for f in build/jpackage/*.exe; do
     if [ -f "$f" ]; then
         cp "$f" releases/
         echo "Staged installer to: releases/$(basename "$f")"
@@ -98,7 +84,7 @@ cat <<EOF > "$MANIFEST_JSON"
 EOF
 
 FIRST=true
-for f in releases/*.msi releases/*.exe; do
+for f in releases/*.msi; do
     if [ -f "$f" ]; then
         FNAME=$(basename "$f")
         FORMAT="${FNAME##*.}"

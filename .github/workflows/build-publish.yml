@@ -3,7 +3,7 @@ name: Build and Publish Installers
 on:
   push:
     tags:
-      - 'v*' # Trigger on version tags, e.g. v1.0.0
+      - "v*" # Trigger on version tags, e.g. v1.0.0
   workflow_dispatch: # Enable manual triggers
 
 permissions:
@@ -31,10 +31,10 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "temurin"
           architecture: ${{ matrix.arch }}
-          cache: 'gradle'
+          cache: "gradle"
 
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v3
@@ -68,8 +68,6 @@ jobs:
           ./gradlew jpackage
         shell: bash
 
-
-
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
@@ -79,7 +77,6 @@ jobs:
           fail_on_unmatched_files: false
           files: |
             build/jpackage/*.msi
-            build/jpackage/*.exe
             build/jpackage/*.dmg
             build/jpackage/*.pkg
             build/jpackage/*.deb

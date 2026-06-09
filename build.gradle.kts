@@ -50,12 +50,7 @@ jlink {
         if (os.isWindows) {
             val iconPath = project.file("src/main/resources/com/ravi/notesapp/app_icon.ico").absolutePath
             imageOptions = listOf("--icon", iconPath)
-            installerOptions = mutableListOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "Redix Systems").apply {
-                if (type == "exe") {
-                    add("--icon")
-                    add(iconPath)
-                }
-            }.toList()
+            installerOptions = listOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "Redix Systems")
         } else if (os.isMacOsX) {
             installerOptions = listOf("--vendor", "Redix Systems", "--mac-package-name", "Notepad_Pro")
             val icnsFile = project.file("src/main/resources/com/ravi/notesapp/app_icon.icns")
