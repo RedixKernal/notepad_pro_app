@@ -4,7 +4,6 @@ import com.ravi.notesapp.model.OpenFile;
 import com.ravi.notesapp.service.SearchService;
 import com.ravi.notesapp.util.DialogUtils;
 import com.ravi.notesapp.util.FileUtils;
-import com.ravi.notesapp.util.SyntaxHighlighter;
 import com.ravi.notesapp.viewmodel.EditorViewModel;
 import com.ravi.notesapp.viewmodel.ExplorerViewModel;
 import com.ravi.notesapp.service.ExecutionService;
@@ -339,7 +338,7 @@ public class EditorController implements Initializable {
         // Initial highlight
         if (of.getPath() != null) {
             String ext = FileUtils.getExtension(of.getPath());
-            area.setStyleSpans(0, SyntaxHighlighter.computeHighlighting(area.getText(), ext));
+            // area.setStyleSpans(0, SyntaxHighlighter.computeHighlighting(area.getText(), ext));
         }
 
         // Sync content changes
@@ -359,7 +358,7 @@ public class EditorController implements Initializable {
             vm.onContentChanged(of, newText);
             if (of.getPath() != null) {
                 String ext = FileUtils.getExtension(of.getPath());
-                area.setStyleSpans(0, SyntaxHighlighter.computeHighlighting(newText, ext));
+                // area.setStyleSpans(0, SyntaxHighlighter.computeHighlighting(newText, ext));
             }
             if (mainController.getVm().getSettings().isAutoSave()) {
                 autoSaveTimer.playFromStart();
