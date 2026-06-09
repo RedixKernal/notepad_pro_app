@@ -146,38 +146,44 @@
 
 /* ─── Tool Bar ────────────────────────────────────────────── */
 .tool-bar {
-    -fx-background-color: -bg-deep;
-    -fx-border-color: transparent transparent -border transparent;
+    -fx-background-color: linear-gradient(to bottom, #252526, #1e1e1e);
+    -fx-border-color: transparent transparent #111111 transparent;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 4 8 4 8;
-    -fx-spacing: 2;
+    -fx-padding: 8 16 8 16;
+    -fx-spacing: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 8, 0, 0, 2);
 }
 
 .toolbar-btn {
     -fx-background-color: transparent;
     -fx-text-fill: -text-secondary;
-    -fx-font-size: 12px;
-    -fx-padding: 4 6 4 6;
-    -fx-background-radius: 5;
+    -fx-font-size: 13px;
+    -fx-padding: 6 10 6 10;
+    -fx-background-radius: 6;
     -fx-cursor: hand;
     -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
 }
 
 .toolbar-btn:hover {
-    -fx-background-color: -bg-hover;
+    -fx-background-color: rgba(255, 255, 255, 0.06);
     -fx-text-fill: -text-primary;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-effect: dropshadow(gaussian, rgba(0, 122, 204, 0.15), 6, 0, 0, 0);
 }
 
 .toolbar-btn:pressed {
-    -fx-background-color: -bg-selected;
+    -fx-background-color: rgba(255, 255, 255, 0.03);
     -fx-text-fill: -accent-bright;
+    -fx-border-color: rgba(0, 122, 204, 0.4);
 }
 
 .svg-icon {
     -fx-fill: -text-secondary;
     -fx-stroke: transparent;
-    -fx-scale-x: 0.75;
-    -fx-scale-y: 0.75;
+    -fx-scale-x: 0.8;
+    -fx-scale-y: 0.8;
 }
 
 #btnNewDir .svg-icon,

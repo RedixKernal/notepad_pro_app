@@ -23,10 +23,16 @@ public final class KeyboardShortcuts {
     // Search
     public static final KeyCombination FIND           = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN);
     public static final KeyCombination FIND_IN_FILES  = new KeyCodeCombination(KeyCode.F, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
+    public static final KeyCombination COMMAND_PALETTE = new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN);
 
     // View
     public static final KeyCombination TOGGLE_THEME   = new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
-    public static final KeyCombination REFRESH_TREE   = new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN);
+    public static final KeyCombination REFRESH_TREE   = new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
+    public static final KeyCombination TOGGLE_SIDEBAR = new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN);
+    public static final KeyCombination TOGGLE_AI      = new KeyCodeCombination(KeyCode.J, KeyCombination.SHORTCUT_DOWN);
+
+    // Execution
+    public static final KeyCombination RUN_CODE       = new KeyCodeCombination(KeyCode.R, KeyCombination.SHORTCUT_DOWN);
 
     // Delete
     public static final KeyCombination DELETE_FILE    = new KeyCodeCombination(KeyCode.DELETE);

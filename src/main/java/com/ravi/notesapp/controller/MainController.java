@@ -37,6 +37,10 @@ public class MainController implements Initializable {
     private ToggleButton btnToggleSidebar;
     @FXML
     private javafx.scene.layout.VBox explorerPane;
+    @FXML
+    private Label lblStatus;
+    @FXML
+    private Label lblFileInfo;
 
     // Sub-controllers injected by FXML includes
     @FXML
@@ -74,18 +78,29 @@ public class MainController implements Initializable {
         editorPaneController.init(vm.getEditorViewModel(), this);
         aiChatPaneController.init(this);
 
-        // Hide AI pane initially
+        // Hide sidebar and AI pane initially
+        splitPane.getItems().remove(explorerPane);
         splitPane.getItems().remove(aiChatPane);
+
+        // Status bar binding
+        lblStatus.textProperty().bind(vm.statusTextProperty());
+        
+        vm.getEditorViewModel().activeFileProperty().addListener((obs, oldFile, newFile) -> {
+            lblFileInfo.textProperty().unbind();
+            if (newFile != null) {
+                lblFileInfo.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(
+                    () -> newFile.getFileName() + (newFile.isDirty() ? " •" : ""),
+                    newFile.dirtyProperty(), newFile.pathProperty()
+                ));
+            } else {
+                lblFileInfo.setText("");
+            }
+        });
 
         // Initialize and listen to recent folders changes reactively
         updateRecentMenu();
         explorerPaneController.getVm().getRecentFolders().addListener(
                 (javafx.collections.ListChangeListener<com.ravi.notesapp.model.RecentFolder>) c -> updateRecentMenu());
-
-        // Active file status (no longer updating footer labels)
-        vm.getEditorViewModel().activeFileProperty().addListener((obs, o, file) -> {
-            // Can be used for future UI updates
-        });
 
         // Persisted settings
         AppSettings s = vm.getSettings();
@@ -97,76 +112,51 @@ public class MainController implements Initializable {
 
         splitPane.sceneProperty().addListener((obs, oldScene, scene) -> {
             if (scene != null) {
-                // KeyboardShortcuts.setup(scene, this, editorPaneController);
                 ThemeUtils.applyTheme(scene, s.getTheme());
 
-                // Register Ctrl+B shortcut to toggle sidebar
-                scene.getAccelerators().put(
-                        new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.B,
-                                javafx.scene.input.KeyCombination.SHORTCUT_DOWN),
-                        () -> {
-                            javafx.application.Platform.runLater(() -> {
-                                btnToggleSidebar.setSelected(!btnToggleSidebar.isSelected());
-                                onToggleSidebar(null);
-                            });
-                        });
+                // Register shortcuts
+                scene.getAccelerators().put(KeyboardShortcuts.TOGGLE_SIDEBAR,
+                        () -> Platform.runLater(() -> {
+                            btnToggleSidebar.setSelected(!btnToggleSidebar.isSelected());
+                            onToggleSidebar(null);
+                        }));
 
-                // Register Ctrl+S shortcut to save file
-                scene.getAccelerators().put(
-                        new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.S,
-                                javafx.scene.input.KeyCombination.SHORTCUT_DOWN),
-                        () -> {
-                            javafx.application.Platform.runLater(() -> {
-                                onSave(null);
-                            });
-                        });
+                scene.getAccelerators().put(KeyboardShortcuts.SAVE,
+                        () -> Platform.runLater(() -> onSave(null)));
 
-                // Register Ctrl+O shortcut to open folder
-                scene.getAccelerators().put(
-                        new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.O,
-                                javafx.scene.input.KeyCombination.SHORTCUT_DOWN),
-                        () -> {
-                            javafx.application.Platform.runLater(() -> {
-                                onOpenFolder(null);
-                            });
-                        });
+                scene.getAccelerators().put(KeyboardShortcuts.OPEN_FOLDER,
+                        () -> Platform.runLater(() -> onOpenFolder(null)));
 
-                // Register Ctrl+F shortcut to find in file
-                scene.getAccelerators().put(
-                        new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.F,
-                                javafx.scene.input.KeyCombination.SHORTCUT_DOWN),
-                        () -> {
-                            javafx.application.Platform.runLater(() -> {
-                                onFind(null);
-                            });
-                        });
+                scene.getAccelerators().put(KeyboardShortcuts.FIND,
+                        () -> Platform.runLater(() -> onFind(null)));
 
-                // Register Ctrl+Shift+T shortcut to toggle theme
-                scene.getAccelerators().put(
-                        new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.T,
-                                javafx.scene.input.KeyCombination.SHORTCUT_DOWN,
-                                javafx.scene.input.KeyCombination.SHIFT_DOWN),
-                        () -> {
-                            javafx.application.Platform.runLater(() -> {
-                                onToggleTheme(null);
-                            });
-                        });
+                scene.getAccelerators().put(KeyboardShortcuts.TOGGLE_THEME,
+                        () -> Platform.runLater(() -> onToggleTheme(null)));
 
-                // Register Ctrl+R shortcut to run code
-                scene.getAccelerators().put(
-                        new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.R,
-                                javafx.scene.input.KeyCombination.SHORTCUT_DOWN),
-                        () -> {
-                            javafx.application.Platform.runLater(() -> {
-                                editorPaneController.runActiveFile();
-                            });
-                        });
+                scene.getAccelerators().put(KeyboardShortcuts.RUN_CODE,
+                        () -> Platform.runLater(() -> editorPaneController.runActiveFile()));
 
-                // Stage close handler — stage is available by now
+                scene.getAccelerators().put(KeyboardShortcuts.COMMAND_PALETTE,
+                        () -> Platform.runLater(this::showCommandPalette));
+
+                scene.getAccelerators().put(KeyboardShortcuts.TOGGLE_AI,
+                        () -> Platform.runLater(() -> {
+                            btnToggleAi.setSelected(!btnToggleAi.isSelected());
+                            onToggleAi(null);
+                        }));
+                
+                scene.getAccelerators().put(KeyboardShortcuts.REFRESH_TREE,
+                        () -> Platform.runLater(() -> {
+                            try {
+                                explorerPaneController.getVm().refresh();
+                                vm.setStatusText("Explorer refreshed.");
+                            } catch (java.io.IOException ignored) {}
+                        }));
+
+                // Stage close handler
                 scene.windowProperty().addListener((wObs, oldWin, win) -> {
-                    if (win instanceof javafx.stage.Stage stage) {
+                    if (win instanceof Stage stage) {
                         com.ravi.notesapp.util.ResizeHelper.addResizeListener(stage);
-
                         stage.setOnCloseRequest(e -> {
                             persistSessionState();
                             persistAndExit();
@@ -183,8 +173,7 @@ public class MainController implements Initializable {
                 if (java.nio.file.Files.isDirectory(last)) {
                     try {
                         explorerPaneController.openFolder(last);
-                    } catch (IOException ignored) {
-                    }
+                    } catch (IOException ignored) {}
                 }
             }
 
@@ -216,20 +205,14 @@ public class MainController implements Initializable {
             Path root = Path.of(lastFolder);
             if (java.nio.file.Files.isDirectory(root)) {
                 paletteController.show(root);
-
-                // Position popup centered
                 double x = getStage().getX() + getStage().getWidth() / 2 - 250;
                 double y = getStage().getY() + 100;
                 palettePopup.show(getStage(), x, y);
+                return;
             }
         }
+        DialogUtils.info("Info", "Open a folder first to use Command Palette.");
     }
-
-    // ──────────────── Window Controls ────────────────────────────────────
-
-    // Custom window controls have been removed.
-
-    // ──────────────── File Menu Handlers ─────────────────────────────────
 
     @FXML
     void onOpenFolder(ActionEvent e) {
@@ -273,8 +256,6 @@ public class MainController implements Initializable {
         boolean isAutoSave = menuAutoSave.isSelected();
         vm.getSettings().setAutoSave(isAutoSave);
         vm.setStatusText("Auto Save " + (isAutoSave ? "Enabled" : "Disabled"));
-
-        // If enabled, save all currently unsaved files
         if (isAutoSave) {
             onSaveAll(null);
         }
@@ -337,8 +318,6 @@ public class MainController implements Initializable {
         persistAndExit();
     }
 
-    // ──────────────── Edit / Search ──────────────────────────────────────
-
     @FXML
     void onFind(ActionEvent e) {
         editorPaneController.showFind();
@@ -348,8 +327,6 @@ public class MainController implements Initializable {
     void onFindInFiles(ActionEvent e) {
         editorPaneController.showFindInFiles();
     }
-
-    // ──────────────── View ───────────────────────────────────────────────
 
     private double lastDividerPosition = 0.22;
 
@@ -402,41 +379,15 @@ public class MainController implements Initializable {
         vm.setStatusText("Theme: " + ThemeUtils.getCurrentTheme());
     }
 
-    // ──────────────── Help ───────────────────────────────────────────────
-
     @FXML
     void onAbout(ActionEvent e) {
         DialogUtils.info("About Notepad_Pro",
                 "Notepad_Pro v2.0.0\nA modern file explorer\nBuilt with modern technology\n\n Design and Developed by Redix Systems");
     }
 
-    // ──────────────── Internal helpers ───────────────────────────────────
-
-    /** Called by ExplorerController when a folder is opened. */
     public void notifyFolderOpened(Path folder) {
         vm.setStatusText("Opened: " + folder);
         vm.getSettings().setLastOpenedFolder(folder.toAbsolutePath().toString());
-    }
-
-    private void handleAppExit() {
-        boolean allSaved = true;
-        for (OpenFile of : vm.getEditorViewModel().getOpenFiles()) {
-            if (of.isDirty()) {
-                DialogUtils.UnsavedChoice choice = DialogUtils.unsavedChanges(of.getFileName());
-                if (choice == DialogUtils.UnsavedChoice.CANCEL)
-                    return;
-                if (choice == DialogUtils.UnsavedChoice.SAVE) {
-                    try {
-                        vm.getEditorViewModel().saveActive();
-                    } catch (IOException ex) {
-                        allSaved = false;
-                    }
-                }
-            }
-        }
-        if (allSaved) {
-            persistAndExit();
-        }
     }
 
     private void persistSessionState() {

@@ -66,6 +66,10 @@ public class EditorViewModel {
     }
 
     // ---------- Save ----------
+    public void save(OpenFile of) throws IOException {
+        if (of != null) editorService.saveFile(of);
+    }
+
     public void saveActive() throws IOException {
         OpenFile of = activeFile.get();
         if (of != null) editorService.saveFile(of);

@@ -41,7 +41,7 @@ public class AIChatController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         chatScroll.setFitToWidth(true);
-        
+
         chatBox.heightProperty().addListener((obs, oldVal, newVal) -> {
             if (isAutoScrolling) {
                 chatScroll.layout();
@@ -163,9 +163,12 @@ public class AIChatController implements Initializable {
         String model = mainController.getVm().getSettings().getAiModel();
         String apiKey = mainController.getVm().getSettings().getAiApiKey();
 
-        if (apiUrl == null || apiUrl.isBlank()) apiUrl = AppSettings.DEFAULT_AI_URL;
-        if (model == null || model.isBlank()) model = AppSettings.DEFAULT_AI_MODEL;
-        if (apiKey == null || apiKey.isBlank()) apiKey = AppSettings.getDefaultApiKey();
+        if (apiUrl == null || apiUrl.isBlank())
+            apiUrl = AppSettings.DEFAULT_AI_URL;
+        if (model == null || model.isBlank())
+            model = AppSettings.DEFAULT_AI_MODEL;
+        if (apiKey == null || apiKey.isBlank())
+            apiKey = AppSettings.getDefaultApiKey();
 
         if (apiKey == null || apiKey.isEmpty()) {
             appendMessage("AI:\nPlease configure your API Key in the settings (⚙ icon).");
@@ -237,9 +240,14 @@ public class AIChatController implements Initializable {
 
     @FXML
     void onPromptKeyPressed(KeyEvent e) {
-        if (e.getCode() == KeyCode.ENTER && !e.isShiftDown()) {
-            e.consume();
-            onSend(null);
+        if (e.getCode() == KeyCode.ENTER) {
+            if (e.isControlDown()) {
+                promptArea.insertText(promptArea.getCaretPosition(), "\n");
+                e.consume();
+            } else {
+                e.consume();
+                onSend(null);
+            }
         }
     }
 
@@ -265,7 +273,8 @@ public class AIChatController implements Initializable {
         toolbar.setMinWidth(0);
 
         javafx.scene.shape.SVGPath copyIcon = new javafx.scene.shape.SVGPath();
-        copyIcon.setContent("M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12V1z");
+        copyIcon.setContent(
+                "M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12V1z");
         copyIcon.setFill(javafx.scene.paint.Color.web("#a0a0a0"));
         copyIcon.setScaleX(0.7);
         copyIcon.setScaleY(0.7);
@@ -356,7 +365,8 @@ public class AIChatController implements Initializable {
 
         javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(bubble);
         container.setMinWidth(0);
-        // Bind to viewport width instead of scroll width to avoid scrollbar layout loops (flickering)
+        // Bind to viewport width instead of scroll width to avoid scrollbar layout
+        // loops (flickering)
         container.prefWidthProperty().bind(chatScroll.viewportBoundsProperty().map(bounds -> bounds.getWidth() - 20));
         container.maxWidthProperty().bind(chatScroll.viewportBoundsProperty().map(bounds -> bounds.getWidth() - 20));
         container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
