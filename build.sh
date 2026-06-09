@@ -65,10 +65,7 @@ for f in build/jpackage/*.msi; do
     if [ -f "$f" ]; then
         cp "$f" releases/
         echo "Staged installer to: releases/$(basename "$f")"
-        if [ -f "RedixSystems.pfx" ]; then
-            echo "Signing $(basename "$f") with RedixSystems.pfx..."
-            powershell.exe -NoProfile -Command "\$cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2('RedixSystems.pfx', 'NotepadPro123'); Set-AuthenticodeSignature -FilePath 'releases/$(basename "$f")' -Certificate \$cert -HashAlgorithm SHA256"
-        fi
+
     fi
 done
 echo ""
@@ -82,10 +79,7 @@ for f in build/jpackage/*.exe; do
     if [ -f "$f" ]; then
         cp "$f" releases/
         echo "Staged installer to: releases/$(basename "$f")"
-        if [ -f "RedixSystems.pfx" ]; then
-            echo "Signing $(basename "$f") with RedixSystems.pfx..."
-            powershell.exe -NoProfile -Command "\$cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2('RedixSystems.pfx', 'NotepadPro123'); Set-AuthenticodeSignature -FilePath 'releases/$(basename "$f")' -Certificate \$cert -HashAlgorithm SHA256"
-        fi
+
     fi
 done
 

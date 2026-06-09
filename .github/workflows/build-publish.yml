@@ -68,29 +68,6 @@ jobs:
           ./gradlew jpackage
         shell: bash
 
-      - name: Sign Installer (Windows only)
-        if: runner.os == 'Windows'
-        run: |
-          $cerPath = "certificate\note_p.cer"
-          if (Test-Path $cerPath) {
-            $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($cerPath)
-            if (-not $cert.HasPrivateKey) {
-              Write-Host "Warning: Certificate does not contain a private key. A .pfx file with a private key is required for code signing. Skipping code signing."
-            } else {
-              $installers = Get-ChildItem -Path "build/jpackage" -File | Where-Object { $_.Extension -eq '.msi' -or $_.Extension -eq '.exe' }
-              foreach ($installer in $installers) {
-                Write-Host "Signing $($installer.FullName)..."
-                try {
-                  Set-AuthenticodeSignature -FilePath $installer.FullName -Certificate $cert -HashAlgorithm SHA256 -ErrorAction Stop
-                } catch {
-                  Write-Host "Warning: Failed to sign $($installer.FullName). The certificate may not be suitable for code signing (e.g., missing Code Signing EKU). Skipping..."
-                }
-              }
-            }
-          } else {
-            Write-Host "Certificate file not found at $cerPath. Skipping code signing."
-          }
-        shell: powershell
 
 
       - name: Create Release and Upload Asset
