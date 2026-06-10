@@ -19,10 +19,6 @@ jobs:
         include:
           - os: windows-latest
             arch: x64
-          - os: macos-latest
-            arch: x64
-          - os: ubuntu-latest
-            arch: x64
 
     steps:
       - name: Checkout Code
@@ -52,23 +48,12 @@ jobs:
           }
         shell: powershell
 
-      - name: Install Linux Dependencies (Ubuntu)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg rpm
-
       - name: Run Build and Package Installer (Windows)
         if: runner.os == 'Windows'
         run: |
           ./gradlew.bat jpackage
           ./build-msix.ps1
         shell: powershell
-
-      - name: Run Build and Package Installer (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          chmod +x ./gradlew
-          ./gradlew jpackage
-        shell: bash
 
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
@@ -80,9 +65,5 @@ jobs:
           files: |
             build/jpackage/*.msi
             build/jpackage/*.msix
-            build/jpackage/*.dmg
-            build/jpackage/*.pkg
-            build/jpackage/*.deb
-            build/jpackage/*.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
