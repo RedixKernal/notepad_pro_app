@@ -11,7 +11,7 @@
   <Identity Name="RedixSystem.notepadpro" Publisher="CN=C2A63D69-6354-42EA-8A10-92942F3B6531" Version="2.0.0.0" />
 
   <Properties>
-    <DisplayName>Notepad Pro</DisplayName>
+    <DisplayName>notepad_pro</DisplayName>
     <PublisherDisplayName>Redix System</PublisherDisplayName>
     <Logo>StoreLogo.png</Logo>
   </Properties>
@@ -26,7 +26,7 @@
 
   <Applications>
     <Application Id="NotepadPro" Executable="Notepad_Pro.exe" EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements DisplayName="Notepad Pro" Description="A professional notepad application." BackgroundColor="transparent" Square150x150Logo="Square150x150Logo.png" Square44x44Logo="Square44x44Logo.png">
+      <uap:VisualElements DisplayName="notepad_pro" Description="A professional notepad application." BackgroundColor="transparent" Square150x150Logo="Square150x150Logo.png" Square44x44Logo="Square44x44Logo.png">
         <uap:DefaultTile Wide310x150Logo="Wide310x150Logo.png" />
       </uap:VisualElements>
     </Application>
