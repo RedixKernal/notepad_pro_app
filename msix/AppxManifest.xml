@@ -8,7 +8,7 @@
     Identity Name: This is usually a generated string like "12345MyCompany.MyApp"
     Publisher: This is the exact Publisher ID, e.g., "CN=A1B2C3D4-E5F6-7890-ABCD-1234567890AB"
   -->
-  <Identity Name="RedixSystems.NotepadPro" Publisher="CN=Redix System" Version="2.0.0.0" />
+  <Identity Name="RedixSystem.notepadpro" Publisher="CN=C2A63D69-6354-42EA-8A10-92942F3B6531" Version="2.0.0.0" />
 
   <Properties>
     <DisplayName>Notepad Pro</DisplayName>
