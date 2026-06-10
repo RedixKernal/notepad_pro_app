@@ -84,14 +84,13 @@ public class MainController implements Initializable {
 
         // Status bar binding
         lblStatus.textProperty().bind(vm.statusTextProperty());
-        
+
         vm.getEditorViewModel().activeFileProperty().addListener((obs, oldFile, newFile) -> {
             lblFileInfo.textProperty().unbind();
             if (newFile != null) {
                 lblFileInfo.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(
-                    () -> newFile.getFileName() + (newFile.isDirty() ? " •" : ""),
-                    newFile.dirtyProperty(), newFile.pathProperty()
-                ));
+                        () -> newFile.getFileName() + (newFile.isDirty() ? " •" : ""),
+                        newFile.dirtyProperty(), newFile.pathProperty()));
             } else {
                 lblFileInfo.setText("");
             }
@@ -144,13 +143,14 @@ public class MainController implements Initializable {
                             btnToggleAi.setSelected(!btnToggleAi.isSelected());
                             onToggleAi(null);
                         }));
-                
+
                 scene.getAccelerators().put(KeyboardShortcuts.REFRESH_TREE,
                         () -> Platform.runLater(() -> {
                             try {
                                 explorerPaneController.getVm().refresh();
                                 vm.setStatusText("Explorer refreshed.");
-                            } catch (java.io.IOException ignored) {}
+                            } catch (java.io.IOException ignored) {
+                            }
                         }));
 
                 // Stage close handler
@@ -173,7 +173,8 @@ public class MainController implements Initializable {
                 if (java.nio.file.Files.isDirectory(last)) {
                     try {
                         explorerPaneController.openFolder(last);
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
                 }
             }
 

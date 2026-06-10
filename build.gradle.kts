@@ -50,9 +50,9 @@ jlink {
         if (os.isWindows) {
             val iconPath = project.file("src/main/resources/com/ravi/notesapp/app_icon.ico").absolutePath
             imageOptions = listOf("--icon", iconPath)
-            installerOptions = listOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "Redix Systems")
+            installerOptions = listOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "")
         } else if (os.isMacOsX) {
-            installerOptions = listOf("--vendor", "Redix Systems", "--mac-package-name", "Notepad_Pro")
+            installerOptions = listOf("--vendor", "Redix System", "--mac-package-name", "Notepad_Pro")
             val icnsFile = project.file("src/main/resources/com/ravi/notesapp/app_icon.icns")
             if (icnsFile.exists()) {
                 imageOptions = listOf("--icon", icnsFile.absolutePath)
@@ -60,7 +60,7 @@ jlink {
         } else if (os.isLinux) {
             val pngPath = project.file("src/main/resources/com/ravi/notesapp/app_icon.png").absolutePath
             imageOptions = listOf("--icon", pngPath)
-            installerOptions = listOf("--linux-shortcut", "--linux-menu-group", "Utility", "--vendor", "Redix Systems")
+            installerOptions = listOf("--linux-shortcut", "--linux-menu-group", "Utility", "--vendor", "Redix System")
         }
     }
 }
