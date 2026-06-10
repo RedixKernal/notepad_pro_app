@@ -25,7 +25,7 @@
   </Resources>
 
   <Applications>
-    <Application Id="NotepadPro" Executable="Notepad_Pro.exe" EntryPoint="Windows.FullTrustApplication">
+    <Application Id="notepad_pro" Executable="Notepad_Pro.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements DisplayName="notepad_pro" Description="A professional notepad application." BackgroundColor="transparent" Square150x150Logo="Square150x150Logo.png" Square44x44Logo="Square44x44Logo.png">
         <uap:DefaultTile Wide310x150Logo="Wide310x150Logo.png" />
       </uap:VisualElements>
