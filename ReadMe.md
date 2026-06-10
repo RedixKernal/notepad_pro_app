@@ -80,3 +80,6 @@ A GitHub Actions workflow is provided at [.github/workflows/build-publish.yml](f
   - Caches Gradle dependencies for faster subsequent runs.
   - Packages the installer with the pre-installed WiX Toolset.
   - Automatically creates a GitHub Release and uploads the `.msi` file as a release asset.
+
+powershell.exe -ExecutionPolicy Bypass -File build-msix.ps1
+powershell.exe -ExecutionPolicy Bypass -File build-msix.ps1

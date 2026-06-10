@@ -10,7 +10,7 @@ Write-Host "Building Notepad Pro MSIX package..."
 Write-Host "Generating app image via Gradle jpackage..."
 # Run gradle to output the app image instead of the msi
 # The output is typically placed in build/jpackage/Notepad_Pro
-& .\gradlew.bat jpackage -PinstallerType=app-image
+& .\gradlew.bat jpackageImage
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Gradle build failed."
     exit $LASTEXITCODE
@@ -56,7 +56,28 @@ Resize-Image -source $IconSource -target "$AppImagePath/Wide310x150Logo.png" -wi
 
 # 5. Find makeappx.exe
 Write-Host "Locating makeappx.exe..."
-$MakeAppxPath = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "makeappx.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+$MakeAppxPath = $null
+$SearchPaths = @(
+    "${env:ProgramFiles(x86)}\Windows Kits\10\bin",
+    "${env:ProgramFiles}\Windows Kits\10\bin",
+    "C:\Windows Kits\10\bin",
+    "${env:USERPROFILE}\Windows Kits\10\bin",
+    "${env:USERPROFILE}\AppData\Local\Microsoft\Windows Kits\10\bin"
+)
+
+foreach ($path in $SearchPaths) {
+    if (Test-Path $path) {
+        $MakeAppxPath = Get-ChildItem -Path $path -Filter "makeappx.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+        if (-not [string]::IsNullOrWhiteSpace($MakeAppxPath)) {
+            break
+        }
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($MakeAppxPath)) {
+    # One final fallback to see if it's on the PATH
+    $MakeAppxPath = (Get-Command makeappx.exe -ErrorAction SilentlyContinue).Source
+}
 
 if ([string]::IsNullOrWhiteSpace($MakeAppxPath)) {
     Write-Error "makeappx.exe not found. Ensure Windows SDK is installed."
