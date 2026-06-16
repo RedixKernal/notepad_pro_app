@@ -74,13 +74,19 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // Wire child controllers
-        explorerPaneController.init(vm.getExplorerViewModel(), this);
+        if (explorerPaneController != null) {
+            explorerPaneController.init(vm.getExplorerViewModel(), this);
+        }
         editorPaneController.init(vm.getEditorViewModel(), this);
         aiChatPaneController.init(this);
 
         // Hide sidebar and AI pane initially
-        splitPane.getItems().remove(explorerPane);
-        splitPane.getItems().remove(aiChatPane);
+        if (explorerPane != null) {
+            splitPane.getItems().remove(explorerPane);
+        }
+        if (aiChatPane != null) {
+            splitPane.getItems().remove(aiChatPane);
+        }
 
         // Status bar binding
         lblStatus.textProperty().bind(vm.statusTextProperty());
@@ -96,14 +102,16 @@ public class MainController implements Initializable {
             }
         });
 
-        // Initialize and listen to recent folders changes reactively
+        // Initialize and listen to recent files changes reactively
         updateRecentMenu();
-        explorerPaneController.getVm().getRecentFolders().addListener(
-                (javafx.collections.ListChangeListener<com.ravi.notesapp.model.RecentFolder>) c -> updateRecentMenu());
+        Platform.runLater(() -> {
+            vm.getEditorViewModel().getRecentFiles().addListener(
+                    (javafx.collections.ListChangeListener<com.ravi.notesapp.model.RecentFolder>) c -> updateRecentMenu());
+        });
 
         // Persisted settings
         AppSettings s = vm.getSettings();
-        vm.setCurrentTheme(s.getTheme());
+        vm.setCurrentTheme(ThemeUtils.getCurrentTheme());
 
         if (menuAutoSave != null) {
             menuAutoSave.setSelected(s.isAutoSave());
@@ -111,7 +119,8 @@ public class MainController implements Initializable {
 
         splitPane.sceneProperty().addListener((obs, oldScene, scene) -> {
             if (scene != null) {
-                ThemeUtils.applyTheme(scene, s.getTheme());
+                // Ensure ThemeUtils currentTheme is set correctly if we want to sync VM
+                vm.setCurrentTheme(ThemeUtils.getCurrentTheme());
 
                 // Register shortcuts
                 scene.getAccelerators().put(KeyboardShortcuts.TOGGLE_SIDEBAR,
@@ -146,10 +155,12 @@ public class MainController implements Initializable {
 
                 scene.getAccelerators().put(KeyboardShortcuts.REFRESH_TREE,
                         () -> Platform.runLater(() -> {
-                            try {
-                                explorerPaneController.getVm().refresh();
-                                vm.setStatusText("Explorer refreshed.");
-                            } catch (java.io.IOException ignored) {
+                            if (explorerPaneController != null) {
+                                try {
+                                    explorerPaneController.getVm().refresh();
+                                    vm.setStatusText("Explorer refreshed.");
+                                } catch (java.io.IOException ignored) {
+                                }
                             }
                         }));
 
@@ -168,7 +179,7 @@ public class MainController implements Initializable {
 
         // Restore last open folder and session
         Platform.runLater(() -> {
-            if (s.getLastOpenedFolder() != null) {
+            if (s.getLastOpenedFolder() != null && explorerPaneController != null) {
                 Path last = Path.of(s.getLastOpenedFolder());
                 if (java.nio.file.Files.isDirectory(last)) {
                     try {
@@ -217,6 +228,7 @@ public class MainController implements Initializable {
 
     @FXML
     void onOpenFolder(ActionEvent e) {
+        if (explorerPaneController == null) return;
         DialogUtils.chooseFolder(getStage(), "Open Folder").ifPresent(path -> {
             try {
                 explorerPaneController.openFolder(path);
@@ -245,7 +257,16 @@ public class MainController implements Initializable {
     @FXML
     void onSaveAll(ActionEvent e) {
         try {
-            vm.saveAll();
+            for (com.ravi.notesapp.model.OpenFile of : vm.getEditorViewModel().getOpenFiles()) {
+                if (of.isDirty()) {
+                    if (of.getPath() == null) {
+                        vm.getEditorViewModel().setActiveFile(of);
+                        onSaveAs(e);
+                    } else {
+                        vm.getEditorViewModel().save(of);
+                    }
+                }
+            }
             vm.setStatusText("Saved all files.");
         } catch (IOException ex) {
             DialogUtils.error("Save Error", "Could not save all files", ex);
@@ -264,26 +285,52 @@ public class MainController implements Initializable {
 
     @FXML
     void onNewFile(ActionEvent e) {
-        explorerPaneController.onNewFile(e);
+        if (explorerPaneController != null) explorerPaneController.onNewFile(e);
     }
 
     @FXML
     void onNewFolder(ActionEvent e) {
-        explorerPaneController.onNewFolder(e);
+        if (explorerPaneController != null) explorerPaneController.onNewFolder(e);
     }
 
     @FXML
     void onRename(ActionEvent e) {
-        explorerPaneController.onRename(e);
+        if (explorerPaneController != null) explorerPaneController.onRename(e);
     }
 
     @FXML
     void onDelete(ActionEvent e) {
-        explorerPaneController.onDelete(e);
+        com.ravi.notesapp.model.OpenFile active = vm.getEditorViewModel().getActiveFile();
+        if (active == null) return;
+        if (active.getPath() == null) {
+            editorPaneController.closeTabByOpenFile(active);
+            return;
+        }
+        if (DialogUtils.confirm("Delete File", null, "Are you sure you want to move " + active.getFileName() + " to the Recycle Bin?")) {
+            try {
+                boolean trashed = false;
+                if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.MOVE_TO_TRASH)) {
+                    trashed = java.awt.Desktop.getDesktop().moveToTrash(active.getPath().toFile());
+                }
+                if (!trashed) {
+                    java.nio.file.Files.delete(active.getPath());
+                }
+                editorPaneController.notifyDeleted(active.getPath());
+                vm.setStatusText("Moved to Recycle Bin: " + active.getFileName());
+            } catch (Exception ex) {
+                DialogUtils.error("Error", "Could not delete file", ex);
+            }
+        }
     }
 
     @FXML
     void onSave(ActionEvent e) {
+        com.ravi.notesapp.model.OpenFile active = vm.getEditorViewModel().getActiveFile();
+        if (active == null) return;
+        if (active.getPath() == null) {
+            onSaveAs(e);
+            return;
+        }
         try {
             editorPaneController.saveActive();
             vm.setStatusText("Saved.");
@@ -374,10 +421,21 @@ public class MainController implements Initializable {
     }
 
     @FXML
+    void onRunActiveFile(ActionEvent e) {
+        if (editorPaneController != null) {
+            editorPaneController.runActiveFile();
+        }
+    }
+
+    @FXML
     void onToggleTheme(ActionEvent event) {
         ThemeUtils.toggleTheme(splitPane.getScene());
-        vm.setCurrentTheme(ThemeUtils.isDark() ? "dark" : "light");
+        boolean isDark = ThemeUtils.isDark();
+        vm.setCurrentTheme(isDark ? "dark" : "light");
         vm.setStatusText("Theme: " + ThemeUtils.getCurrentTheme());
+        if (aiChatPaneController != null) {
+            aiChatPaneController.updateTheme(isDark);
+        }
     }
 
     @FXML
@@ -416,6 +474,7 @@ public class MainController implements Initializable {
                 getStage().getHeight(),
                 dividerPos);
         Platform.exit();
+        System.exit(0);
     }
 
     private Stage getStage() {
@@ -429,21 +488,30 @@ public class MainController implements Initializable {
         if (menuRecent == null)
             return;
         menuRecent.getItems().clear();
-        for (com.ravi.notesapp.model.RecentFolder rf : explorerPaneController.getVm().getRecentFolders()) {
-            MenuItem item = new MenuItem(rf.toPath().toString());
-            item.setOnAction(evt -> {
-                try {
-                    explorerPaneController.openFolder(rf.toPath());
-                } catch (IOException ex) {
-                    DialogUtils.error("Error", "Cannot open folder", ex);
-                }
-            });
-            menuRecent.getItems().add(item);
+
+        if (vm.getEditorViewModel() != null) {
+            for (com.ravi.notesapp.model.RecentFolder rf : vm.getEditorViewModel().getRecentFiles()) {
+                MenuItem item = new MenuItem(rf.toPath().toString());
+                item.setOnAction(e -> {
+                    try {
+                        editorPaneController.openFile(rf.toPath());
+                    } catch (IOException ex) {
+                        DialogUtils.error("Error", "Could not open file", ex);
+                    }
+                });
+                menuRecent.getItems().add(item);
+            }
         }
+
         if (menuRecent.getItems().isEmpty()) {
-            MenuItem empty = new MenuItem("No Recent Folders");
+            MenuItem empty = new MenuItem("No Recent Files");
             empty.setDisable(true);
             menuRecent.getItems().add(empty);
+        } else {
+            menuRecent.getItems().add(new SeparatorMenuItem());
+            MenuItem clearItem = new MenuItem("Clear Recent Files");
+            clearItem.setOnAction(e -> vm.getEditorViewModel().clearRecentFiles());
+            menuRecent.getItems().add(clearItem);
         }
     }
 

@@ -135,16 +135,119 @@
     -fx-background-color: linear-gradient(to bottom, #ffffff, #f4f5fb);
     -fx-border-color: transparent transparent #d0d4e8 transparent;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 8 16 8 16;
-    -fx-spacing: 8;
+    -fx-padding: 4 8 4 8;
+    -fx-spacing: 4;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
 }
+
+/* ─── Tab Pane ───────────────────────────────────────────── */
+.editor-tabs {
+    -fx-background-color: transparent;
+    -fx-tab-min-height: 38px;
+    -fx-tab-max-height: 38px;
+}
+
+.editor-tabs .tab-header-area {
+    -fx-padding: 0;
+}
+
+.editor-tabs .tab-header-background {
+    -fx-background-color: #f3f3f3;
+    -fx-border-color: transparent transparent #cccccc transparent;
+    -fx-border-width: 1;
+}
+
+.editor-tabs .tab {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #cccccc transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0 15px 0 15px;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8 8 0 0;
+}
+
+.editor-tabs .tab .focus-indicator {
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.editor-tabs .tab .tab-label {
+    -fx-text-fill: #666666;
+    -fx-font-size: 13px;
+}
+
+.editor-tabs .tab:hover {
+    -fx-background-color: #eaeaea;
+    -fx-cursor: hand;
+}
+
+.editor-tabs .tab:hover .tab-label {
+    -fx-text-fill: #333333;
+}
+
+.editor-tabs .tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #007acc transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+}
+
+.editor-tabs .tab:selected .tab-label {
+    -fx-text-fill: #111111;
+    -fx-font-weight: bold;
+}
+
+.editor-tabs .tab-close-button {
+    -fx-background-color: #888888;
+    -fx-shape: "M 0,0 H1 L 4,3 7,0 H8 V1 L 5,4 8,7 V8 H7 L 4,5 1,8 H0 V7 L 3,4 0,1 Z";
+    -fx-scale-x: 0.8;
+    -fx-scale-y: 0.8;
+}
+
+.editor-tabs .tab:selected .tab-close-button {
+    -fx-background-color: #333333;
+}
+
+.editor-tabs .tab .tab-close-button:hover {
+    -fx-background-color: #d83b01;
+    -fx-cursor: hand;
+}
+
+.add-tab-btn {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 8;
+    -fx-cursor: hand;
+}
+.add-tab-btn .svg-icon {
+    -fx-fill: #666666;
+}
+.add-tab-btn:hover {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 4px;
+}
+
+.add-tab-placeholder {
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent !important;
+    -fx-padding: 0 5px 0 5px !important;
+    -fx-cursor: hand;
+}
+.add-tab-placeholder .tab-label {
+    -fx-padding: 0 !important;
+}
+.add-tab-placeholder .svg-icon {
+    -fx-fill: #666666;
+}
+.add-tab-placeholder:hover .svg-icon {
+    -fx-fill: #111111;
+}
+
 
 .toolbar-btn {
     -fx-background-color: transparent;
     -fx-text-fill: -text-secondary;
     -fx-font-size: 13px;
-    -fx-padding: 6 10 6 10;
+    -fx-padding: 4 8 4 8;
     -fx-background-radius: 6;
     -fx-cursor: hand;
     -fx-border-color: transparent;
@@ -152,14 +255,17 @@
     -fx-border-radius: 6;
 }
 
-.toolbar-btn:hover {
+.toolbar-btn:hover,
+.toolbar-btn.menu-button:hover,
+.toolbar-btn.menu-button:showing {
     -fx-background-color: rgba(0, 0, 0, 0.04);
     -fx-text-fill: -text-primary;
     -fx-border-color: rgba(0, 0, 0, 0.08);
     -fx-effect: dropshadow(gaussian, rgba(74, 107, 204, 0.15), 6, 0, 0, 0);
 }
 
-.toolbar-btn:pressed {
+.toolbar-btn:pressed,
+.toolbar-btn.menu-button:pressed {
     -fx-background-color: rgba(0, 0, 0, 0.02);
     -fx-text-fill: -accent-bright;
     -fx-border-color: rgba(74, 107, 204, 0.4);
@@ -190,6 +296,7 @@
 
 .toolbar-btn.menu-button .label {
     -fx-text-fill: -text-secondary;
+    -fx-padding: 0;
 }
 
 .toolbar-btn.menu-button:hover .label,
@@ -199,6 +306,13 @@
 
 .toolbar-btn.menu-button .arrow {
     -fx-background-color: -text-secondary;
+}
+
+.toolbar-btn.menu-button.file-menu-btn .arrow-button,
+.toolbar-btn.menu-button.file-menu-btn .arrow {
+    -fx-padding: 0;
+    -fx-shape: null;
+    -fx-background-color: transparent;
 }
 
 .toolbar-btn.menu-button:hover .arrow,
@@ -333,6 +447,26 @@
     -fx-border-color: transparent;
 }
 
+.recent-list .chat-scroll {
+    -fx-background-color: transparent;
+}
+.chat-send-btn {
+    -fx-background-color: #007ACC;
+    -fx-background-radius: 16;
+    -fx-padding: 6 10 6 10;
+    -fx-cursor: hand;
+}
+.chat-send-btn .svg-path {
+    -fx-fill: white;
+}
+.chat-send-btn:hover {
+    -fx-background-color: #005A9E;
+}
+.chat-send-btn:disabled {
+    -fx-background-color: #E0E0E0;
+    -fx-opacity: 1.0;
+}
+
 .recent-list .list-cell {
     -fx-background-color: transparent;
     -fx-text-fill: -text-secondary;
@@ -352,6 +486,66 @@
 
 .editor-panel {
     -fx-background-color: -bg-base;
+}
+
+/* ─── Custom Tab Bar ────────────────────────────────────────── */
+.custom-tab-bar {
+    -fx-background-color: #ececec;
+    -fx-min-height: 35px;
+    -fx-max-height: 35px;
+}
+.tab-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+.tab-scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+.tab-container {
+    -fx-background-color: transparent;
+}
+.custom-tab {
+    -fx-background-color: #e3e3e3;
+    -fx-padding: 0 10px;
+    -fx-cursor: hand;
+    -fx-pref-height: 35px;
+    -fx-alignment: CENTER_LEFT;
+}
+.custom-tab .label {
+    -fx-text-fill: #555555;
+}
+.custom-tab:hover {
+    -fx-background-color: #dbdbdb;
+}
+.custom-tab:hover .label {
+    -fx-text-fill: #333333;
+}
+.custom-tab.selected {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #007acc transparent transparent transparent;
+    -fx-border-width: 2px 0 0 0;
+}
+.custom-tab.selected .label {
+    -fx-text-fill: #111111;
+    -fx-font-weight: bold;
+}
+.custom-tab .close-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+    -fx-cursor: hand;
+}
+.custom-tab .close-btn .svg-icon {
+    -fx-fill: #666666;
+}
+.custom-tab .close-btn:hover {
+    -fx-background-color: #cccccc;
+    -fx-background-radius: 3px;
+}
+.editor-tabs-hidden .tab-header-area {
+    visibility: hidden;
+    -fx-pref-height: 0;
+    -fx-padding: 0;
 }
 
 .find-bar {
@@ -414,7 +608,8 @@
 
 .editor-tabs .tab {
     -fx-background-color: -bg-panel;
-    -fx-background-radius: 0;
+    -fx-background-radius: 6 6 0 0;
+    -fx-border-radius: 6 6 0 0;
     -fx-padding: 0 10 0 10;
     -fx-border-color: transparent -border transparent transparent;
     -fx-border-width: 0 1 0 0;
@@ -440,8 +635,10 @@
 
 .editor-tabs .tab:selected {
     -fx-background-color: -bg-base;
-    -fx-border-color: -accent -border transparent transparent;
-    -fx-border-width: 2 1 0 0;
+    -fx-background-radius: 6 6 0 0;
+    -fx-border-radius: 6 6 0 0;
+    -fx-border-color: -accent -border transparent -border;
+    -fx-border-width: 2 1 0 1;
 }
 
 .editor-tabs .tab:selected .tab-label {
@@ -450,9 +647,13 @@
 }
 
 .editor-tabs .tab-close-button {
-    -fx-background-color: -text-muted;
+    -fx-background-color: transparent;
     -fx-scale-x: 0.8;
     -fx-scale-y: 0.8;
+}
+
+.editor-tabs .tab:hover .tab-close-button {
+    -fx-background-color: -text-muted;
 }
 
 .editor-tabs .tab:selected .tab-close-button {
@@ -467,11 +668,7 @@
 .editor-area {
     -fx-background-color: white;
     -fx-text-fill: #1e2040;
-    -fx-padding: 14 18 14 18;
-    /* -fx-border-color: transparent; */
-    /* -fx-control-inner-background: white; */
-    /* -fx-highlight-fill: -bg-selected; */
-    /* -fx-highlight-text-fill: -text-primary; */
+    -fx-padding: 6 18 1 12;
     -fx-font-size: 13px;
 }
 
@@ -630,6 +827,10 @@
     -fx-padding: 10 15 10 15;
 }
 
+.dialog-pane .label {
+    -fx-text-fill: -text-primary;
+}
+
 .dialog-prompt-label {
     -fx-text-fill: -text-primary;
     -fx-font-size: 14px;
@@ -751,11 +952,6 @@
 }
 
 /* ---------------- RichTextFX Syntax Highlighting ---------------------------------------- */
-.code-area .lineno {
-    -fx-text-fill: -text-muted;
-    -fx-background-color: -bg-deepest;
-    -fx-padding: 0 5 0 5;
-}
 
 .keyword {
     -fx-fill: #0000ff;
@@ -960,6 +1156,29 @@
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
     -fx-background-insets: 0;
+}
+
+.console-input {
+    -fx-background-color: #f7f7f7;
+    -fx-text-fill: #1e1e1e;
+    -fx-font-family: "JetBrains Mono", "Consolas", monospace;
+    -fx-font-size: 13px;
+    -fx-border-width: 0;
+    -fx-padding: 0 0 0 4;
+}
+
+.console-input:focused {
+    -fx-background-color: #f7f7f7;
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.console-prompt {
+    -fx-text-fill: #4a6bcc;
+    -fx-font-family: "JetBrains Mono", "Consolas", monospace;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
 }
 
 /* ---------------- No Arrow ComboBox ----------------------------------------- */

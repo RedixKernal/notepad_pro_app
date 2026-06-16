@@ -13,7 +13,26 @@ public final class ThemeUtils {
     public static final String DARK  = "dark";
     public static final String LIGHT = "light";
 
-    private static String currentTheme = DARK;
+    private static String currentTheme = getSystemTheme();
+
+    public static String getSystemTheme() {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            try {
+                Process process = Runtime.getRuntime().exec("reg query \"HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize\" /v AppsUseLightTheme");
+                process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS);
+                java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("0x1")) {
+                        return LIGHT;
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore and default to dark
+            }
+        }
+        return DARK;
+    }
 
     private ThemeUtils() {}
 

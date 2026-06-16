@@ -68,25 +68,9 @@ public class ExplorerController implements Initializable {
                     boolean isDir = Files.isDirectory(path);
                     String name = path.getFileName() != null ? path.getFileName().toString() : path.toString();
                     
-                    if (!isDir && name.contains(".")) {
-                        String ext = name.substring(name.lastIndexOf('.') + 1);
-                        javafx.scene.image.Image img = com.ravi.notesapp.util.LanguageIconMap.getIconForExtension(ext);
-                        if (img != null) {
-                            javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
-                            imgView.setFitWidth(16);
-                            imgView.setFitHeight(16);
-                            setGraphic(imgView);
-                            setText(name);
-                        } else {
-                            String icon = FileUtils.getIcon(path, isDir);
-                            setText(icon + " " + name);
-                            setGraphic(null);
-                        }
-                    } else {
-                        String icon = FileUtils.getIcon(path, isDir);
-                        setText(icon + " " + name);
-                        setGraphic(null);
-                    }
+                    String icon = FileUtils.getIcon(path, isDir);
+                    setText(icon + " " + name);
+                    setGraphic(null);
                     
                     getStyleClass().removeAll("tree-folder", "tree-file");
                     getStyleClass().add(isDir ? "tree-folder" : "tree-file");

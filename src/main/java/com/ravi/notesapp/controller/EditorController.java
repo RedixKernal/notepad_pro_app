@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -57,6 +58,10 @@ public class EditorController implements Initializable {
     private double consoleDragInitialDivider;
     private double consoleDragStartY;
 
+    @FXML
+    private TextField consoleInput;
+    private Process activeProcess;
+
     private EditorViewModel vm;
     private MainController mainController;
     private final SearchService searchService = new SearchService();
@@ -65,6 +70,15 @@ public class EditorController implements Initializable {
     // Map from tab to its OpenFile
     private final Map<Tab, OpenFile> tabFileMap = new LinkedHashMap<>();
     private final Map<Path, Tab> pathTabMap = new HashMap<>();
+
+    @FXML
+    private ScrollPane tabScrollPane;
+    @FXML
+    private HBox tabContainer;
+    @FXML
+    private ListView<String> recentFilesListView;
+    private final Map<Tab, Node> nativeToCustomTab = new HashMap<>();
+    private Tab addTabPlaceholder;
 
     // In-file search state
     private List<int[]> matches = new ArrayList<>(); // [start, end]
@@ -80,17 +94,176 @@ public class EditorController implements Initializable {
         this.vm = vm;
         this.mainController = mainController;
 
+        boolean initialHasTabs = !tabPane.getTabs().isEmpty();
+        tabScrollPane.setVisible(initialHasTabs);
+        tabScrollPane.setManaged(initialHasTabs);
+
+        tabPane.getTabs().addListener((javafx.collections.ListChangeListener.Change<? extends Tab> c) -> {
+            boolean hasTabs = !tabPane.getTabs().isEmpty();
+            tabScrollPane.setVisible(hasTabs);
+            tabScrollPane.setManaged(hasTabs);
+
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    for (Tab t : c.getAddedSubList()) {
+                        Node customTab = createCustomTab(t);
+                        nativeToCustomTab.put(t, customTab);
+                        tabContainer.getChildren().add(customTab);
+                    }
+                }
+                if (c.wasRemoved()) {
+                    for (Tab t : c.getRemoved()) {
+                        Node customTab = nativeToCustomTab.remove(t);
+                        if (customTab != null) {
+                            tabContainer.getChildren().remove(customTab);
+                        }
+                    }
+                }
+            }
+        });
+
         tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            if (oldTab != null && nativeToCustomTab.containsKey(oldTab)) {
+                nativeToCustomTab.get(oldTab).getStyleClass().remove("selected");
+            }
+            if (newTab != null && nativeToCustomTab.containsKey(newTab)) {
+                Node custom = nativeToCustomTab.get(newTab);
+                if (!custom.getStyleClass().contains("selected")) {
+                    custom.getStyleClass().add("selected");
+                }
+                Platform.runLater(() -> ensureVisible(custom));
+            }
+
             if (newTab == null) {
                 vm.setActiveFile(null);
                 showWelcome(true);
             } else {
                 OpenFile of = tabFileMap.get(newTab);
-                vm.setActiveFile(of);
+                if (of != null) {
+                    vm.setActiveFile(of);
+                    showWelcome(false);
+                }
             }
         });
 
+        // Forward vertical scroll on the scroll pane to horizontal scroll
+        tabScrollPane.setOnScroll(event -> {
+            if (event.getDeltaY() != 0) {
+                double hvalue = tabScrollPane.getHvalue();
+                double width = tabScrollPane.getContent().getBoundsInLocal().getWidth();
+                double viewportWidth = tabScrollPane.getViewportBounds().getWidth();
+                if (width > viewportWidth) {
+                    double delta = event.getDeltaY() > 0 ? -0.1 : 0.1;
+                    tabScrollPane.setHvalue(Math.max(0, Math.min(1, hvalue + delta)));
+                    event.consume();
+                }
+            }
+        });
+
+        // Recent Files List
+        if (recentFilesListView != null) {
+            vm.getRecentFiles().addListener(
+                    (javafx.collections.ListChangeListener<com.ravi.notesapp.model.RecentFolder>) c -> refreshRecentFilesList());
+            refreshRecentFilesList();
+
+            recentFilesListView.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 1) {
+                    int idx = recentFilesListView.getSelectionModel().getSelectedIndex();
+                    if (idx >= 0 && idx < vm.getRecentFiles().size()) {
+                        com.ravi.notesapp.model.RecentFolder rf = vm.getRecentFiles().get(idx);
+                        try {
+                            openFile(rf.toPath());
+                        } catch (IOException ex) {
+                            com.ravi.notesapp.util.DialogUtils.error("Error", "Could not open file", ex);
+                        }
+                    }
+                }
+            });
+        }
+
         showWelcome(true);
+    }
+
+    private void refreshRecentFilesList() {
+        if (recentFilesListView != null) {
+            java.util.List<com.ravi.notesapp.model.RecentFolder> files = vm.getRecentFiles();
+            recentFilesListView.getItems().setAll(
+                    files.stream().map(rf -> "📄  " + rf.getDisplayName()).toList());
+        }
+    }
+
+    @FXML
+    void onOpenFileFromWelcome(javafx.event.ActionEvent e) {
+        if (mainController != null) {
+            mainController.onOpenFile(e);
+        }
+    }
+
+    @FXML
+    private Button btnAddTab;
+
+    @FXML
+    void onAddTab(ActionEvent e) {
+        createNewUntitledTab();
+    }
+
+    public void createNewUntitledTab() {
+        OpenFile of = vm.createUntitledFile();
+        Tab tab = createTab(of);
+        tabPane.getTabs().add(tab);
+        tabPane.getSelectionModel().select(tab);
+        showWelcome(false);
+    }
+
+    private Node createCustomTab(Tab nativeTab) {
+        HBox box = new HBox(8);
+        box.getStyleClass().add("custom-tab");
+        box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        Label label = new Label();
+        label.textProperty().bind(nativeTab.textProperty());
+
+        Button closeBtn = new Button();
+        closeBtn.getStyleClass().add("close-btn");
+        javafx.scene.shape.SVGPath closeIcon = new javafx.scene.shape.SVGPath();
+        closeIcon.setContent(
+                "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z");
+        closeIcon.getStyleClass().add("svg-icon");
+        closeIcon.setScaleX(0.7);
+        closeIcon.setScaleY(0.7);
+        closeBtn.setGraphic(closeIcon);
+
+        closeBtn.setOnAction(e -> {
+            e.consume();
+            requestClose(nativeTab);
+        });
+
+        box.getChildren().addAll(label, closeBtn);
+
+        box.setOnMouseClicked(e -> {
+            tabPane.getSelectionModel().select(nativeTab);
+        });
+
+        return box;
+    }
+
+    private void ensureVisible(Node node) {
+        double width = tabScrollPane.getContent().getBoundsInLocal().getWidth();
+        double x = node.getBoundsInParent().getMinX();
+        double nodeWidth = node.getBoundsInLocal().getWidth();
+        double viewportWidth = tabScrollPane.getViewportBounds().getWidth();
+
+        if (width > viewportWidth) {
+            double hvalue = tabScrollPane.getHvalue();
+            double visibleLeft = hvalue * (width - viewportWidth);
+            double visibleRight = visibleLeft + viewportWidth;
+
+            if (x < visibleLeft) {
+                tabScrollPane.setHvalue(x / (width - viewportWidth));
+            } else if (x + nodeWidth > visibleRight) {
+                tabScrollPane.setHvalue((x + nodeWidth - viewportWidth) / (width - viewportWidth));
+            }
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────
@@ -111,15 +284,18 @@ public class EditorController implements Initializable {
 
     private Tab createTab(OpenFile of) {
         Tab tab = new Tab();
-        tab.textProperty()
-                .bind(of.pathProperty()
-                        .map(p -> (p != null && p.getFileName() != null ? p.getFileName().toString() : "Untitled"))
-                        .flatMap(name -> of.dirtyProperty().map(d -> d ? "● " + name : name)));
+        tab.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(() -> {
+            String name = (of.getPath() != null && of.getPath().getFileName() != null)
+                    ? of.getPath().getFileName().toString()
+                    : "Untitled";
+            return of.isDirty() ? "● " + name : name;
+        }, of.pathProperty(), of.dirtyProperty()));
 
         // Editor area
         CodeArea area = new CodeArea(of.getContent());
         area.setWrapText(true);
         area.getStyleClass().add("editor-area");
+
 
         // Context menu to dynamically change text color
         ContextMenu contextMenu = new ContextMenu();
@@ -338,7 +514,8 @@ public class EditorController implements Initializable {
         // Initial highlight
         if (of.getPath() != null) {
             String ext = FileUtils.getExtension(of.getPath());
-            // area.setStyleSpans(0, SyntaxHighlighter.computeHighlighting(area.getText(), ext));
+            // area.setStyleSpans(0, SyntaxHighlighter.computeHighlighting(area.getText(),
+            // ext));
         }
 
         // Sync content changes
@@ -381,27 +558,15 @@ public class EditorController implements Initializable {
 
         // Close request
         tab.setOnCloseRequest(e -> {
-            if (of.isDirty()) {
-                e.consume();
-                DialogUtils.UnsavedChoice choice = DialogUtils.unsavedChanges(of.getFileName());
-                if (choice == DialogUtils.UnsavedChoice.CANCEL)
-                    return;
-                if (choice == DialogUtils.UnsavedChoice.SAVE) {
-                    try {
-                        vm.saveActive();
-                    } catch (IOException ex) {
-                        DialogUtils.error("Error", "Save failed", ex);
-                        return;
-                    }
-                }
-                forceClose(tab, of);
-            }
+            e.consume();
+            requestClose(tab);
         });
 
         tab.setOnClosed(e -> {
             OpenFile closed = tabFileMap.remove(tab);
             if (closed != null) {
-                pathTabMap.remove(closed.getPath());
+                if (closed.getPath() != null)
+                    pathTabMap.remove(closed.getPath());
                 vm.closeFile(closed);
             }
             if (tabPane.getTabs().isEmpty())
@@ -411,9 +576,58 @@ public class EditorController implements Initializable {
         return tab;
     }
 
+    private void requestClose(Tab tab) {
+        OpenFile of = tabFileMap.get(tab);
+        if (of != null && of.isDirty()) {
+            DialogUtils.UnsavedChoice choice = DialogUtils.unsavedChanges(of.getFileName());
+            if (choice == DialogUtils.UnsavedChoice.CANCEL) {
+                return;
+            }
+            if (choice == DialogUtils.UnsavedChoice.SAVE) {
+                try {
+                    // Make it active so saveActive triggers the correct save flow (including Save
+                    // As dialog if untitled)
+                    tabPane.getSelectionModel().select(tab);
+                    if (mainController != null) {
+                        mainController.onSave(new javafx.event.ActionEvent());
+                    } else {
+                        vm.save(of);
+                    }
+                    // Wait, if it's still dirty after Save (e.g. user canceled Save As), abort
+                    // closing.
+                    if (of.isDirty()) {
+                        return;
+                    }
+                } catch (Exception ex) {
+                    DialogUtils.error("Error", "Save failed", ex);
+                    return;
+                }
+            }
+        }
+        if (of != null) {
+            forceClose(tab, of);
+        } else {
+            tabPane.getTabs().remove(tab);
+        }
+    }
+
+    public void closeTabByOpenFile(OpenFile of) {
+        Tab toRemove = null;
+        for (Map.Entry<Tab, OpenFile> entry : tabFileMap.entrySet()) {
+            if (entry.getValue() == of) {
+                toRemove = entry.getKey();
+                break;
+            }
+        }
+        if (toRemove != null) {
+            forceClose(toRemove, of);
+        }
+    }
+
     private void forceClose(Tab tab, OpenFile of) {
         tabFileMap.remove(tab);
-        pathTabMap.remove(of.getPath());
+        if (of.getPath() != null)
+            pathTabMap.remove(of.getPath());
         vm.closeFile(of);
         tabPane.getTabs().remove(tab);
         if (tabPane.getTabs().isEmpty())
@@ -427,7 +641,8 @@ public class EditorController implements Initializable {
         OpenFile of = vm.restoreSessionFile(p, sessionTab.getContent(), sessionTab.isDirty());
 
         Tab tab = createTab(of);
-        tabPane.getTabs().add(tab);
+        int insertPos = tabPane.getTabs().size() > 0 ? tabPane.getTabs().size() - 1 : 0;
+        tabPane.getTabs().add(insertPos, tab);
         pathTabMap.put(p, tab);
         tabFileMap.put(tab, of);
         showWelcome(false);
@@ -475,7 +690,7 @@ public class EditorController implements Initializable {
     public void notifyDeleted(Path path) {
         List<Path> toClose = new ArrayList<>();
         for (Path p : pathTabMap.keySet()) {
-            if (p.startsWith(path))
+            if (p != null && p.startsWith(path))
                 toClose.add(p);
         }
         for (Path p : toClose) {
@@ -713,18 +928,25 @@ public class EditorController implements Initializable {
         }
         consoleOutput.clear();
         consoleOutput.appendText("> Running: " + active.getFileName() + "\n");
+        if (consoleInput != null) {
+            consoleInput.clear();
+            consoleInput.setDisable(false);
+            consoleInput.requestFocus();
+        }
 
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
                 Process process = executionService.startProcess(active.getPath());
+                activeProcess = process;
 
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        String finalLine = line;
+                try (java.io.InputStreamReader reader = new java.io.InputStreamReader(process.getInputStream())) {
+                    char[] buffer = new char[1024];
+                    int read;
+                    while ((read = reader.read(buffer)) != -1) {
+                        String chunk = new String(buffer, 0, read);
                         Platform.runLater(() -> {
-                            consoleOutput.appendText(finalLine + "\n");
+                            consoleOutput.appendText(chunk);
                         });
                     }
                 }
@@ -732,6 +954,10 @@ public class EditorController implements Initializable {
                 int exitCode = process.waitFor();
                 Platform.runLater(() -> {
                     consoleOutput.appendText("\n> Process exited with code " + exitCode + "\n");
+                    if (consoleInput != null) {
+                        consoleInput.setDisable(true);
+                    }
+                    activeProcess = null;
                 });
 
                 return null;
@@ -744,6 +970,25 @@ public class EditorController implements Initializable {
         });
 
         new Thread(task).start();
+    }
+
+    @FXML
+    void onConsoleInputEntered(ActionEvent e) {
+        if (activeProcess != null && activeProcess.isAlive()) {
+            try {
+                String input = consoleInput.getText();
+                java.io.OutputStream out = activeProcess.getOutputStream();
+                out.write((input + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                out.flush();
+                consoleOutput.appendText("❯ " + input + "\n");
+                consoleInput.clear();
+            } catch (IOException ex) {
+                consoleOutput.appendText("\n> Error writing input: " + ex.getMessage() + "\n");
+            }
+        } else {
+            consoleInput.clear();
+            consoleInput.setDisable(true);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────

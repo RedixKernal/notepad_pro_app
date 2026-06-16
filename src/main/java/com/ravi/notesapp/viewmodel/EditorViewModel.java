@@ -18,18 +18,34 @@ import java.util.Optional;
 public class EditorViewModel {
 
     private final EditorService editorService;
-    private final FileService   fileService;
+    private final FileService fileService;
     private final RecentService recentService;
 
-    private final ObservableList<OpenFile>  openFiles      = FXCollections.observableArrayList();
-    private final ObjectProperty<OpenFile>  activeFile     = new SimpleObjectProperty<>();
-    private final StringProperty            searchQuery    = new SimpleStringProperty("");
-    private final BooleanProperty           searchVisible  = new SimpleBooleanProperty(false);
+    private final ObservableList<OpenFile> openFiles = FXCollections.observableArrayList();
+    private final ObservableList<com.ravi.notesapp.model.RecentFolder> recentFiles = FXCollections
+            .observableArrayList();
+    private final ObjectProperty<OpenFile> activeFile = new SimpleObjectProperty<>();
+    private final StringProperty searchQuery = new SimpleStringProperty("");
+    private final BooleanProperty searchVisible = new SimpleBooleanProperty(false);
 
     public EditorViewModel(EditorService editorService, FileService fileService, RecentService recentService) {
         this.editorService = editorService;
-        this.fileService   = fileService;
+        this.fileService = fileService;
         this.recentService = recentService;
+        refreshRecent();
+    }
+
+    public void refreshRecent() {
+        recentFiles.setAll(recentService.getRecentFiles());
+    }
+
+    public ObservableList<com.ravi.notesapp.model.RecentFolder> getRecentFiles() {
+        return recentFiles;
+    }
+
+    public void clearRecentFiles() {
+        recentService.clearRecentFiles();
+        refreshRecent();
     }
 
     // ---------- Open ----------
@@ -44,6 +60,7 @@ public class EditorViewModel {
         openFiles.add(of);
         activeFile.set(of);
         recentService.addRecentFile(path);
+        refreshRecent();
         return of;
     }
 
@@ -65,23 +82,38 @@ public class EditorViewModel {
         return true;
     }
 
+    // ---------- Create Untitled ----------
+    public OpenFile createUntitledFile() {
+        OpenFile of = new OpenFile(null, "");
+        openFiles.add(of);
+        activeFile.set(of);
+        return of;
+    }
+
     // ---------- Save ----------
     public void save(OpenFile of) throws IOException {
-        if (of != null) editorService.saveFile(of);
+        if (of != null)
+            editorService.saveFile(of);
     }
 
     public void saveActive() throws IOException {
         OpenFile of = activeFile.get();
-        if (of != null) editorService.saveFile(of);
+        if (of != null)
+            editorService.saveFile(of);
     }
 
     public void saveAs(OpenFile of, Path newPath) throws IOException {
         editorService.saveFileAs(of, newPath);
         recentService.addRecentFile(newPath);
+        refreshRecent();
     }
 
     public void saveAll() throws IOException {
-        editorService.saveAll();
+        for (OpenFile of : openFiles) {
+            if (of.isDirty() && of.getPath() != null) {
+                editorService.saveFile(of);
+            }
+        }
     }
 
     // ---------- Update path after rename ----------
@@ -96,15 +128,40 @@ public class EditorViewModel {
     }
 
     // ---------- Search ----------
-    public void showSearch()  { searchVisible.set(true); }
-    public void hideSearch()  { searchVisible.set(false); }
-    public void toggleSearch(){ searchVisible.set(!searchVisible.get()); }
+    public void showSearch() {
+        searchVisible.set(true);
+    }
+
+    public void hideSearch() {
+        searchVisible.set(false);
+    }
+
+    public void toggleSearch() {
+        searchVisible.set(!searchVisible.get());
+    }
 
     // ---------- Properties ----------
-    public ObservableList<OpenFile>  getOpenFiles()          { return openFiles; }
-    public ObjectProperty<OpenFile>  activeFileProperty()    { return activeFile; }
-    public OpenFile                  getActiveFile()          { return activeFile.get(); }
-    public void                      setActiveFile(OpenFile f){ activeFile.set(f); }
-    public StringProperty            searchQueryProperty()   { return searchQuery; }
-    public BooleanProperty           searchVisibleProperty() { return searchVisible; }
+    public ObservableList<OpenFile> getOpenFiles() {
+        return openFiles;
+    }
+
+    public ObjectProperty<OpenFile> activeFileProperty() {
+        return activeFile;
+    }
+
+    public OpenFile getActiveFile() {
+        return activeFile.get();
+    }
+
+    public void setActiveFile(OpenFile f) {
+        activeFile.set(f);
+    }
+
+    public StringProperty searchQueryProperty() {
+        return searchQuery;
+    }
+
+    public BooleanProperty searchVisibleProperty() {
+        return searchVisible;
+    }
 }

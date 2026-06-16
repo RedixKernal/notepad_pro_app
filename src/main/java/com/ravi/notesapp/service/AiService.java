@@ -69,10 +69,7 @@ public class AiService {
                                     JsonObject delta = choices.get(0).getAsJsonObject().getAsJsonObject("delta");
                                     if (delta != null) {
                                         if (delta.has("reasoning") && !delta.get("reasoning").isJsonNull()) {
-                                            String r = delta.get("reasoning").getAsString();
-                                            if (r != null && !r.isEmpty()) {
-                                                onNextToken.accept("[REASONING]" + r);
-                                            }
+                                            // Ignore reasoning tokens to prevent UI clutter
                                         }
                                         if (delta.has("content") && !delta.get("content").isJsonNull()) {
                                             String token = delta.get("content").getAsString();

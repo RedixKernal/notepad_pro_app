@@ -10,67 +10,59 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.web.WebView;
+import javafx.scene.Node;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class AIChatController implements Initializable {
 
-    @FXML
-    private ScrollPane chatScroll;
-    @FXML
-    private javafx.scene.layout.VBox chatBox;
-    @FXML
-    private TextArea promptArea;
-    @FXML
-    private Button sendBtn;
+    @FXML private WebView chatWebView;
+    @FXML private TextArea promptArea;
+    @FXML private Button sendBtn;
 
     private MainController mainController;
     private final AiService aiService = new AiService();
-
-    // Live stream references
-    private Label currentAiLabel;
-    private Label currentReasoningLabel;
-    private javafx.scene.layout.HBox currentLoaderBox;
-    private javafx.scene.control.ScrollPane currentReasoningScroll;
+    private Node originalSendGraphic;
+    
+    private String currentAiId = null;
     private String fullCurrentText = "";
-
-    private boolean isAutoScrolling = true;
-    private boolean inThinkBlock = false;
+    private Bridge jsBridge;
+    private boolean isGenerating = false;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        chatScroll.setFitToWidth(true);
-
-        chatBox.heightProperty().addListener((obs, oldVal, newVal) -> {
-            if (isAutoScrolling) {
-                chatScroll.layout();
-                chatScroll.setVvalue(1.0);
+        originalSendGraphic = sendBtn.getGraphic();
+        
+        // Setup WebView bridge and theme when loaded
+        chatWebView.getEngine().getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                jsBridge = new Bridge(chatWebView);
+                netscape.javascript.JSObject win = (netscape.javascript.JSObject) chatWebView.getEngine().executeScript("window");
+                win.setMember("app", jsBridge);
+                
+                boolean isDark = "dark".equals(com.ravi.notesapp.util.ThemeUtils.getSystemTheme());
+                chatWebView.getEngine().executeScript("setTheme(" + isDark + ")");
             }
         });
-
-        // Detect manual user scroll up
-        chatScroll.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, evt -> {
-            if (evt.getDeltaY() > 0) { // Scrolling UP
-                isAutoScrolling = false;
-            }
-        });
-
-        // Detect user grabbing scrollbar
-        chatScroll.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, evt -> {
-            isAutoScrolling = false;
-        });
-
-        // Re-enable auto-scroll if user reaches bottom
-        chatScroll.vvalueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal.doubleValue() >= chatScroll.getVmax() - 0.01) {
-                isAutoScrolling = true;
-            }
-        });
+        
+        URL htmlUrl = getClass().getResource("/com/ravi/notesapp/view/chat_view.html");
+        if(htmlUrl != null) {
+            chatWebView.getEngine().load(htmlUrl.toExternalForm());
+        }
     }
 
     public void init(MainController mainController) {
         this.mainController = mainController;
+    }
+
+    public void updateTheme(boolean isDark) {
+        if (chatWebView != null && chatWebView.getEngine() != null) {
+            try {
+                chatWebView.getEngine().executeScript("setTheme(" + isDark + ")");
+            } catch (Exception ignored) {}
+        }
     }
 
     @FXML
@@ -119,125 +111,6 @@ public class AIChatController implements Initializable {
         });
     }
 
-    private void appendToReasoning(String text) {
-        if (currentReasoningLabel != null) {
-            String current = currentReasoningLabel.getText();
-            if (current.equals("Redix is Thinking...")) {
-                currentReasoningLabel.setText(current + "\n" + text.trim());
-            } else {
-                currentReasoningLabel.setText(current + text);
-            }
-            currentReasoningScroll.setVvalue(currentReasoningScroll.getVmax());
-        }
-    }
-
-    private void appendToContent(String text) {
-        if (currentAiLabel != null) {
-            fullCurrentText += text;
-            currentAiLabel.setText(fullCurrentText);
-        }
-    }
-
-    private void removeLoaderBox() {
-        if (currentLoaderBox != null) {
-            javafx.scene.layout.VBox bubble = (javafx.scene.layout.VBox) currentLoaderBox.getParent();
-            if (bubble != null) {
-                bubble.getChildren().remove(currentLoaderBox);
-            }
-            currentLoaderBox = null;
-        }
-    }
-
-    @FXML
-    void onSend(ActionEvent e) {
-        String query = promptArea.getText().trim();
-        if (query.isEmpty())
-            return;
-
-        isAutoScrolling = true;
-        promptArea.clear();
-        appendMessage("You:\n" + query);
-
-        String context = mainController.editorPaneController.getActiveFileContent();
-        String apiUrl = mainController.getVm().getSettings().getAiProviderUrl();
-        String model = mainController.getVm().getSettings().getAiModel();
-        String apiKey = mainController.getVm().getSettings().getAiApiKey();
-
-        if (apiUrl == null || apiUrl.isBlank())
-            apiUrl = AppSettings.DEFAULT_AI_URL;
-        if (model == null || model.isBlank())
-            model = AppSettings.DEFAULT_AI_MODEL;
-        if (apiKey == null || apiKey.isBlank())
-            apiKey = AppSettings.getDefaultApiKey();
-
-        if (apiKey == null || apiKey.isEmpty()) {
-            appendMessage("AI:\nPlease configure your API Key in the settings (⚙ icon).");
-            return;
-        }
-
-        isAutoScrolling = true;
-        inThinkBlock = false;
-        sendBtn.setDisable(true);
-        promptArea.setDisable(true);
-        appendMessage("AI:\n[LOADING]");
-
-        aiService.askAiStream(apiUrl, model, apiKey, context, query, token -> {
-            if (token == null || token.isEmpty())
-                return;
-            Platform.runLater(() -> {
-                if (token.startsWith("[REASONING]")) {
-                    appendToReasoning(token.substring("[REASONING]".length()));
-                } else {
-                    String t = token;
-                    if (t.contains("<think>")) {
-                        inThinkBlock = true;
-                        t = t.replace("<think>", "");
-                    }
-                    if (t.contains("</think>")) {
-                        inThinkBlock = false;
-                        String[] parts = t.split("</think>");
-                        if (parts.length > 0) {
-                            appendToReasoning(parts[0]);
-                        }
-
-                        // Thinking finished, remove the box!
-                        // removeLoaderBox();
-
-                        if (parts.length > 1) {
-                            appendToContent(parts[1]);
-                        }
-                    } else if (inThinkBlock) {
-                        appendToReasoning(t);
-                    } else {
-                        // First content outside of thinking! Remove the box!
-                        if (!t.trim().isEmpty()) {
-                            removeLoaderBox();
-                            appendToContent(t);
-                        }
-                    }
-                }
-            });
-        }).thenRun(() -> {
-            Platform.runLater(() -> {
-                removeLoaderBox();
-                sendBtn.setDisable(false);
-                promptArea.setDisable(false);
-                promptArea.requestFocus();
-            });
-        }).exceptionally(throwable -> {
-            Platform.runLater(() -> {
-                removeLoaderBox();
-                sendBtn.setDisable(false);
-                promptArea.setDisable(false);
-                promptArea.requestFocus();
-                if (currentAiLabel != null) {
-                    currentAiLabel.setText(currentAiLabel.getText() + "\nError: " + throwable.getMessage());
-                }
-            });
-            return null;
-        });
-    }
-
     @FXML
     void onPromptKeyPressed(KeyEvent e) {
         if (e.getCode() == KeyCode.ENTER) {
@@ -251,129 +124,142 @@ public class AIChatController implements Initializable {
         }
     }
 
-    private void appendMessage(String message) {
-        boolean isUser = message.startsWith("You:\n");
-        String textContent = isUser ? message.substring(5) : message.substring(4);
+    @FXML
+    void onSend(ActionEvent e) {
+        if (isGenerating) return;
+        
+        String query = promptArea.getText().trim();
+        if (query.isEmpty()) return;
+        
+        isGenerating = true;
 
-        javafx.scene.layout.VBox bubble = new javafx.scene.layout.VBox(8);
-        bubble.setMinWidth(0);
-        javafx.scene.layout.HBox.setHgrow(bubble, javafx.scene.layout.Priority.ALWAYS);
-        bubble.setStyle(
-                "-fx-padding: 16 12 16 12; -fx-border-color: transparent transparent -border transparent; -fx-border-width: 1;");
+        AppSettings settings = mainController.getVm().getSettings();
+        String apiUrl = settings.getAiProviderUrl();
+        String apiKey = settings.getAiApiKey();
+        String model = settings.getAiModel();
 
-        Label header = new Label(isUser ? "👤 You" : "🤖 Redix");
-        header.setStyle("-fx-font-weight: bold; -fx-text-fill: -text-primary; -fx-font-size: 14px;");
+        if (apiUrl == null || apiUrl.isEmpty()) apiUrl = AppSettings.DEFAULT_AI_URL;
+        if (model == null || model.isEmpty()) model = AppSettings.DEFAULT_AI_MODEL;
+        if (apiKey == null || apiKey.isEmpty()) apiKey = AppSettings.getDefaultApiKey();
 
-        javafx.scene.layout.HBox headerBox = new javafx.scene.layout.HBox(header);
-        headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        javafx.scene.layout.HBox.setHgrow(headerBox, javafx.scene.layout.Priority.ALWAYS);
-
-        javafx.scene.layout.HBox toolbar = new javafx.scene.layout.HBox(8);
-        toolbar.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-        toolbar.setMinWidth(0);
-
-        javafx.scene.shape.SVGPath copyIcon = new javafx.scene.shape.SVGPath();
-        copyIcon.setContent(
-                "M19 21H8V7h11m0-2H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m-3-4H4a2 2 0 0 0-2 2v14h2V3h12V1z");
-        copyIcon.setFill(javafx.scene.paint.Color.web("#a0a0a0"));
-        copyIcon.setScaleX(0.7);
-        copyIcon.setScaleY(0.7);
-
-        javafx.scene.shape.SVGPath tickIcon = new javafx.scene.shape.SVGPath();
-        tickIcon.setContent("M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z");
-        tickIcon.setFill(javafx.scene.paint.Color.web("#4CAF50"));
-        tickIcon.setScaleX(0.9);
-        tickIcon.setScaleY(0.9);
-
-        Button copyBtn = new Button();
-        copyBtn.setGraphic(copyIcon);
-        copyBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
-        toolbar.getChildren().add(copyBtn);
-
-        javafx.scene.layout.HBox topRow = new javafx.scene.layout.HBox(headerBox, toolbar);
-
-        if (!isUser && message.equals("AI:\n[LOADING]")) {
-            currentLoaderBox = new javafx.scene.layout.HBox(10);
-            currentLoaderBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-            currentLoaderBox.setStyle(
-                    "-fx-background-color: rgba(201, 201, 201, 0.1); -fx-background-radius: 8; -fx-padding: 6 12 6 12;");
-
-            ProgressIndicator spinner = new ProgressIndicator();
-            spinner.setPrefSize(14, 14);
-
-            currentReasoningLabel = new Label("Redix is Thinking...");
-            currentReasoningLabel.setStyle("-fx-text-fill: -text-muted; -fx-font-style: italic; -fx-font-size: 12px;");
-            currentReasoningLabel.setWrapText(true);
-            currentReasoningLabel.setMinWidth(0);
-
-            currentReasoningScroll = new javafx.scene.control.ScrollPane(currentReasoningLabel);
-            currentReasoningScroll.setFitToWidth(true);
-            currentReasoningScroll.setMaxHeight(30);
-            currentReasoningScroll.setStyle(
-                    "-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
-            currentReasoningScroll.setVbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
-            currentReasoningScroll.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
-
-            currentLoaderBox.getChildren().addAll(spinner, currentReasoningScroll);
-            javafx.scene.layout.HBox.setHgrow(currentReasoningScroll, javafx.scene.layout.Priority.ALWAYS);
-            javafx.scene.layout.HBox.setHgrow(currentLoaderBox, javafx.scene.layout.Priority.ALWAYS);
-
-            currentAiLabel = new Label();
-            currentAiLabel.setWrapText(true);
-            currentAiLabel.setMinWidth(0);
-            currentAiLabel.getStyleClass().add("chat-bubble-text");
-            fullCurrentText = "";
-
-            Label thisAiLabel = currentAiLabel;
-            copyBtn.setOnAction(evt -> {
-                javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-                content.putString(thisAiLabel.getText());
-                javafx.scene.input.Clipboard.getSystemClipboard().setContent(content);
-                copyBtn.setGraphic(tickIcon);
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (Exception ex) {
-                    }
-                    Platform.runLater(() -> copyBtn.setGraphic(copyIcon));
-                }).start();
-            });
-
-            bubble.getChildren().addAll(topRow, currentLoaderBox, currentAiLabel);
-        } else {
-            Label textLabel = new Label(textContent);
-            textLabel.setWrapText(true);
-            textLabel.setMinWidth(0);
-            textLabel.getStyleClass().add("chat-bubble-text");
-
-            copyBtn.setOnAction(evt -> {
-                javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
-                content.putString(textLabel.getText());
-                javafx.scene.input.Clipboard.getSystemClipboard().setContent(content);
-                copyBtn.setGraphic(tickIcon);
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (Exception ex) {
-                    }
-                    Platform.runLater(() -> copyBtn.setGraphic(copyIcon));
-                }).start();
-            });
-
-            bubble.getChildren().addAll(topRow, textLabel);
+        promptArea.clear();
+        String context = "";
+        if (mainController != null && mainController.editorPaneController != null) {
+            context = mainController.editorPaneController.getActiveFileContent();
         }
 
-        javafx.scene.layout.HBox container = new javafx.scene.layout.HBox(bubble);
-        container.setMinWidth(0);
-        // Bind to viewport width instead of scroll width to avoid scrollbar layout
-        // loops (flickering)
-        container.prefWidthProperty().bind(chatScroll.viewportBoundsProperty().map(bounds -> bounds.getWidth() - 20));
-        container.maxWidthProperty().bind(chatScroll.viewportBoundsProperty().map(bounds -> bounds.getWidth() - 20));
-        container.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        promptArea.setDisable(true);
+        
+        ProgressIndicator pi = new ProgressIndicator();
+        pi.setPrefSize(16, 16);
+        sendBtn.setGraphic(pi);
 
-        Platform.runLater(() -> {
-            chatBox.getChildren().add(container);
-            chatScroll.setVvalue(chatScroll.getVmax());
+        String userId = java.util.UUID.randomUUID().toString();
+        executeJS("appendMessage('" + userId + "', true, " + escapeJS(query) + ")");
+        
+        currentAiId = java.util.UUID.randomUUID().toString();
+        executeJS("appendMessage('" + currentAiId + "', false, '[LOADING]')");
+        fullCurrentText = "";
+
+        aiService.askAiStream(apiUrl, model, apiKey, context, query, token -> {
+            if (token == null || token.isEmpty()) return;
+            Platform.runLater(() -> {
+                fullCurrentText += token;
+                // Basic cleanup for reasoning tags (hide them)
+                String cleaned = fullCurrentText.replaceAll("(?s)<think>.*?</think>", "");
+                if (fullCurrentText.contains("<think>") && !fullCurrentText.contains("</think>")) {
+                    cleaned = fullCurrentText.substring(0, fullCurrentText.indexOf("<think>"));
+                }
+                executeJS("updateMessage('" + currentAiId + "', " + escapeJS(cleaned) + ")");
+            });
+        }).thenRun(() -> {
+            Platform.runLater(this::resetInput);
+        }).exceptionally(throwable -> {
+            Platform.runLater(() -> {
+                resetInput();
+                fullCurrentText += "\n\n**Error:** " + throwable.getMessage();
+                executeJS("updateMessage('" + currentAiId + "', " + escapeJS(fullCurrentText) + ")");
+            });
+            return null;
         });
+    }
+
+    private void resetInput() {
+        sendBtn.setGraphic(originalSendGraphic);
+        isGenerating = false;
+        promptArea.setDisable(false);
+        promptArea.requestFocus();
+    }
+
+    private void executeJS(String script) {
+        try {
+            chatWebView.getEngine().executeScript(script);
+        } catch (Exception ex) {
+            System.err.println("JS Error: " + ex.getMessage());
+        }
+    }
+
+    private String escapeJS(String input) {
+        if (input == null) return "null";
+        String safe = input.replace("\\", "\\\\")
+                           .replace("\"", "\\\"")
+                           .replace("'", "\\'")
+                           .replace("\n", "\\n")
+                           .replace("\r", "");
+        return "'" + safe + "'";
+    }
+
+    public static class Bridge {
+        private final WebView chatWebView;
+
+        public Bridge(WebView chatWebView) {
+            this.chatWebView = chatWebView;
+        }
+
+        public void copyText(String id) {
+            Platform.runLater(() -> {
+                try {
+                    String text = (String) chatWebView.getEngine().executeScript("getRawText('" + id + "')");
+                    javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+                    content.putString(text);
+                    javafx.scene.input.Clipboard.getSystemClipboard().setContent(content);
+                } catch (Exception ex) {
+                    System.err.println("Copy Failed: " + ex.getMessage());
+                }
+            });
+        }
+
+        public void reportText(String id) {
+            Platform.runLater(() -> {
+                try {
+                    String text = (String) chatWebView.getEngine().executeScript("getRawText('" + id + "')");
+                    boolean confirm = DialogUtils.confirm(
+                        "Report Content", 
+                        "Report inappropriate AI content", 
+                        "Are you sure you want to report this response?"
+                    );
+                    if (confirm) {
+                        try {
+                            String auditData = "Report Date: " + java.time.LocalDateTime.now() + "\nMessage:\n" + text + "\n\n";
+                            java.nio.file.Path dir = java.nio.file.Path.of(System.getProperty("user.home"), ".notespad");
+                            if (!java.nio.file.Files.exists(dir)) {
+                                java.nio.file.Files.createDirectories(dir);
+                            }
+                            java.nio.file.Files.writeString(
+                                dir.resolve("ai_audit_reports.log"),
+                                auditData,
+                                java.nio.file.StandardOpenOption.CREATE,
+                                java.nio.file.StandardOpenOption.APPEND
+                            );
+                            DialogUtils.info("Report Submitted", "Thank you. The content has been reported and logged for auditing.");
+                        } catch (java.io.IOException ex) {
+                            System.err.println("Failed to write audit log: " + ex.getMessage());
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Report Failed: " + ex.getMessage());
+                }
+            });
+        }
     }
 }

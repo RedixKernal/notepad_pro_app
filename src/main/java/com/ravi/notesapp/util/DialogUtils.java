@@ -152,5 +152,16 @@ public final class DialogUtils {
         if (resource != null) {
             dp.getStylesheets().add(resource.toExternalForm());
         }
+        
+        // Add app icon to the dialog window
+        try {
+            javafx.stage.Stage stage = (javafx.stage.Stage) dp.getScene().getWindow();
+            java.net.URL iconUrl = DialogUtils.class.getResource("/com/ravi/notesapp/app_icon.png");
+            if (iconUrl != null) {
+                stage.getIcons().add(new javafx.scene.image.Image(iconUrl.toExternalForm()));
+            }
+        } catch (Exception e) {
+            // Ignore if the window cannot be cast to Stage or icon is missing
+        }
     }
 }

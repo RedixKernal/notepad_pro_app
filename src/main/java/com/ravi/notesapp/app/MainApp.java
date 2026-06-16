@@ -43,13 +43,20 @@ public class MainApp extends Application {
         FXMLLoader loader = new FXMLLoader(fxmlUrl);
         Parent root = loader.load();
 
+        com.ravi.notesapp.service.SettingsService settingsService = new com.ravi.notesapp.service.SettingsService();
+        com.ravi.notesapp.model.AppSettings settings = settingsService.getSettings();
+
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-        double width = Math.max(800, Math.min(1280, screenBounds.getWidth() * 0.85));
-        double height = Math.max(500, Math.min(800, screenBounds.getHeight() * 0.85));
+        double defaultWidth = Math.max(800, Math.min(1280, screenBounds.getWidth() * 0.85));
+        double defaultHeight = Math.max(500, Math.min(800, screenBounds.getHeight() * 0.85));
+
+        double width = settings.getWindowWidth() > 0 ? settings.getWindowWidth() : defaultWidth;
+        double height = settings.getWindowHeight() > 0 ? settings.getWindowHeight() : defaultHeight;
         Scene scene = new Scene(root, width, height);
 
-        // Apply default dark theme
-        URL cssUrl = getClass().getResource("/com/ravi/notesapp/styles/dark.css");
+        // Apply system default theme
+        String systemTheme = com.ravi.notesapp.util.ThemeUtils.getSystemTheme();
+        URL cssUrl = getClass().getResource("/com/ravi/notesapp/styles/" + systemTheme + ".css");
         scene.getStylesheets().add(Objects.requireNonNull(cssUrl).toExternalForm());
 
         URL iconUrl = getClass().getResource("/com/ravi/notesapp/app_icon.png");

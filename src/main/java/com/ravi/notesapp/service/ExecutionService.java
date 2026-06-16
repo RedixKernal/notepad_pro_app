@@ -16,76 +16,100 @@ public class ExecutionService {
 
         String os = System.getProperty("os.name").toLowerCase();
         boolean isWin = os.contains("win");
+        
+        java.util.List<String> command = new java.util.ArrayList<>();
 
         if (fileName.endsWith(".java")) {
-            pb.command("java", fileName);
+            command.add("java");
+            command.add(fileName);
         } else if (fileName.endsWith(".py")) {
-            pb.command(isWin ? "python" : "python3", fileName);
-        } else if (fileName.endsWith(".js") || fileName.endsWith(".mjs")) {
-            pb.command("node", fileName);
-        } else if (fileName.endsWith(".cpp") || fileName.endsWith(".cxx") || fileName.endsWith(".cc")) {
+            command.add(isWin ? "python" : "python3");
+            command.add(fileName);
+        } else if (fileName.endsWith(".js") || fileName.endsWith(".mjs") || fileName.endsWith(".ts")) {
+            command.add("node");
+            command.add(fileName);
+        } else if (fileName.endsWith(".cpp") || fileName.endsWith(".cxx") || fileName.endsWith(".cc") || fileName.endsWith(".c")) {
+            String compiler = fileName.endsWith(".c") ? "gcc" : "g++";
             String base = fileName.substring(0, fileName.lastIndexOf('.'));
-            String exeName = isWin ? base + ".exe" : "./" + base;
-            if (isWin)
-                pb.command("cmd", "/c", "g++ " + fileName + " -o " + base + ".exe && " + base + ".exe");
-            else
-                pb.command("sh", "-c", "g++ " + fileName + " -o " + base + " && ./" + base);
-        } else if (fileName.endsWith(".c")) {
-            String base = fileName.substring(0, fileName.lastIndexOf('.'));
-            if (isWin)
-                pb.command("cmd", "/c", "gcc " + fileName + " -o " + base + ".exe && " + base + ".exe");
-            else
-                pb.command("sh", "-c", "gcc " + fileName + " -o " + base + " && ./" + base);
-        } else if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
-            if (isWin)
-                pb.command("cmd", "/c", "start " + fileName);
-            else if (os.contains("mac"))
-                pb.command("open", fileName);
-            else
-                pb.command("xdg-open", fileName);
+            String exeName = isWin ? base + ".exe" : base;
+            String exePath = isWin ? base + ".exe" : "./" + base;
+
+            // Compile first
+            ProcessBuilder compilePb = new ProcessBuilder(compiler, fileName, "-o", exeName);
+            compilePb.directory(new File(parentDir));
+            compilePb.redirectErrorStream(true);
+            Process compileProcess = compilePb.start();
+            try {
+                int exitCode = compileProcess.waitFor();
+                if (exitCode != 0) {
+                    return compileProcess; // Return compile process so errors can be seen
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Compilation interrupted");
+            }
+            command.add(exePath);
         } else if (fileName.endsWith(".php")) {
-            pb.command("php", fileName);
+            command.add("php");
+            command.add(fileName);
         } else if (fileName.endsWith(".cs")) {
             String base = fileName.substring(0, fileName.lastIndexOf('.'));
-            if (isWin)
-                pb.command("cmd", "/c", "csc " + fileName + " && " + base + ".exe");
-            else
-                pb.command("sh", "-c", "mcs " + fileName + " && mono " + base + ".exe");
-        } else if (fileName.endsWith(".asm") || fileName.endsWith(".s")) {
-            String base = fileName.substring(0, fileName.lastIndexOf('.'));
-            String objName = base + (isWin ? ".obj" : ".o");
-            String exeName = base + (isWin ? ".exe" : "");
-            if (isWin)
-                pb.command("cmd", "/c", "nasm -f win64 " + fileName + " -o " + objName + " && gcc " + objName + " -o " + exeName + " && " + exeName);
-            else
-                pb.command("sh", "-c", "nasm -f elf64 " + fileName + " -o " + objName + " && gcc " + objName + " -o " + base + " && ./" + base);
-        } else if (fileName.endsWith(".lua")) {
-            pb.command("lua", fileName);
-        } else if (fileName.endsWith(".rb")) {
-            pb.command("ruby", fileName);
-        } else if (fileName.endsWith(".kt") || fileName.endsWith(".kts")) {
-            if (isWin)
-                pb.command("cmd", "/c", "kotlinc " + fileName + " -include-runtime -d out.jar && java -jar out.jar");
-            else
-                pb.command("sh", "-c", "kotlinc " + fileName + " -include-runtime -d out.jar && java -jar out.jar");
+            String exeName = base + ".exe";
+            
+            ProcessBuilder compilePb = new ProcessBuilder(isWin ? "csc" : "mcs", fileName);
+            compilePb.directory(new File(parentDir));
+            compilePb.redirectErrorStream(true);
+            Process compileProcess = compilePb.start();
+            try {
+                if (compileProcess.waitFor() != 0) return compileProcess;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Compilation interrupted");
+            }
+            
+            if (isWin) {
+                command.add(exeName);
+            } else {
+                command.add("mono");
+                command.add(exeName);
+            }
         } else if (fileName.endsWith(".rs")) {
             String base = fileName.substring(0, fileName.lastIndexOf('.'));
-            if (isWin)
-                pb.command("cmd", "/c", "rustc " + fileName + " && " + base + ".exe");
-            else
-                pb.command("sh", "-c", "rustc " + fileName + " && ./" + base);
+            String exeName = isWin ? base + ".exe" : "./" + base;
+            
+            ProcessBuilder compilePb = new ProcessBuilder("rustc", fileName);
+            compilePb.directory(new File(parentDir));
+            compilePb.redirectErrorStream(true);
+            Process compileProcess = compilePb.start();
+            try {
+                if (compileProcess.waitFor() != 0) return compileProcess;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Compilation interrupted");
+            }
+            command.add(exeName);
         } else if (fileName.endsWith(".go")) {
-            pb.command("go", "run", fileName);
-        } else if (fileName.endsWith(".ts")) {
-            pb.command("node", fileName);
+            command.add("go");
+            command.add("run");
+            command.add(fileName);
         } else if (fileName.endsWith(".dart")) {
-            pb.command("dart", "run", fileName);
+            command.add("dart");
+            command.add("run");
+            command.add(fileName);
         } else if (fileName.endsWith(".sh") || fileName.endsWith(".bash")) {
-            pb.command("bash", fileName);
+            command.add("bash");
+            command.add(fileName);
+        } else if (fileName.endsWith(".rb")) {
+            command.add("ruby");
+            command.add(fileName);
+        } else if (fileName.endsWith(".lua")) {
+            command.add("lua");
+            command.add(fileName);
         } else {
             throw new IllegalArgumentException("Unsupported file type for execution: " + fileName);
         }
 
+        pb.command(command);
         return pb.start();
     }
 }

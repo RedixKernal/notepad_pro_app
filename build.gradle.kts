@@ -19,7 +19,7 @@ repositories {
 
 javafx {
     version = "21"
-    modules = listOf("javafx.controls", "javafx.fxml", "javafx.swing")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.swing", "javafx.web")
 }
 
 dependencies {
@@ -50,7 +50,7 @@ jlink {
         if (os.isWindows) {
             val iconPath = project.file("src/main/resources/com/ravi/notesapp/app_icon.ico").absolutePath
             imageOptions = listOf("--icon", iconPath)
-            installerOptions = listOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "")
+            installerOptions = listOf("--win-dir-chooser", "--win-menu", "--win-shortcut", "--win-per-user-install", "--vendor", "Redix System")
         } else if (os.isMacOsX) {
             installerOptions = listOf("--vendor", "Redix System", "--mac-package-name", "Notepad_Pro")
             val icnsFile = project.file("src/main/resources/com/ravi/notesapp/app_icon.icns")
