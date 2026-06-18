@@ -1,0 +1,23 @@
+Notepad_Pro Usage Instructions
+
+Welcome to Notepad_Pro!
+
+Usage:
+1. Open the application.
+2. Use "Open Folder" or "Open File" from the File menu to begin.
+3. Your work is automatically saved if Auto Save is enabled.
+4. Use the sidebar to navigate your project directory.
+5. You can toggle themes via the Theme button in the toolbar.
+
+By installing this software, you agree to its usage terms.
+
+---
+AI USAGE RESTRICTION POLICY
+
+1. Purpose and Scope: The integrated Artificial Intelligence (AI) assistant within Notepad_Pro is provided solely to enhance user productivity, code analysis, and text generation.
+2. Prohibited Uses: Users are strictly prohibited from utilizing the AI features to generate, disseminate, or promote malicious code, malware, hate speech, illegal activities, or any content that violates intellectual property rights.
+3. Data Privacy: The AI features operate by transmitting user queries to external language models. Users must refrain from inputting sensitive, proprietary, or personally identifiable information (PII) into the AI assistant, as the confidentiality of such data cannot be fully guaranteed by Redix Systems.
+4. Disclaimer of Liability: The AI assistant generates responses probabilistically. Redix Systems makes no warranties regarding the accuracy, completeness, or reliability of the AI-generated content. Users must independently verify all AI outputs before integrating them into production environments.
+5. Service Availability: Access to AI features is provided on an "as-is" basis and may be subject to rate limits, maintenance windows, or discontinuation without prior notice.
+
+Thank you for choosing Notepad_Pro!

@@ -245,12 +245,12 @@
 }
 
 .split-pane-divider {
-    -fx-background-color: -border;
+    -fx-background-color: transparent;
     -fx-padding: 0 1 0 1;
 }
 
 .split-pane-divider:hover {
-    -fx-background-color: -accent-dim;
+    -fx-background-color: -accent-glow;
 }
 
 /* ─── Explorer Panel ─────────────────────────────────────── */
@@ -330,11 +330,15 @@
 .file-tree .tree-cell:hover {
     -fx-background-color: -bg-hover;
     -fx-text-fill: -text-primary;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0 4px;
 }
 
 .file-tree .tree-cell:selected {
     -fx-background-color: -bg-selected;
     -fx-text-fill: -accent-bright;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0 4px;
 }
 
 .file-tree .tree-cell.tree-folder {
@@ -377,11 +381,15 @@
 .recent-list .list-cell:hover {
     -fx-background-color: -bg-hover;
     -fx-text-fill: -text-primary;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0 6px;
 }
 
 .recent-list .list-cell:selected {
     -fx-background-color: -bg-selected;
     -fx-text-fill: -accent-bright;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0 6px;
 }
 
 /* ─── Editor Panel ───────────────────────────────────────── */
@@ -494,9 +502,10 @@
 
 /* ─── Custom Tab Bar ────────────────────────────────────────── */
 .custom-tab-bar {
-    -fx-background-color: #252526;
-    -fx-min-height: 35px;
-    -fx-max-height: 35px;
+    -fx-background-color: -bg-deepest;
+    -fx-min-height: 36px;
+    -fx-max-height: 36px;
+    -fx-padding: 2 4 0 4;
 }
 .tab-scroll-pane {
     -fx-background-color: transparent;
@@ -508,30 +517,40 @@
 }
 .tab-container {
     -fx-background-color: transparent;
+    -fx-spacing: 2;
+    -fx-padding: 0;
 }
 .custom-tab {
-    -fx-background-color: #2d2d2d;
-    -fx-padding: 0 10px;
+    -fx-background-color: -bg-panel;
+    -fx-opacity: 0.65;
+    -fx-padding: 0 14px;
     -fx-cursor: hand;
-    -fx-pref-height: 35px;
+    -fx-pref-height: 34px;
     -fx-alignment: CENTER_LEFT;
+    -fx-background-radius: 8 8 0 0;
+    -fx-border-radius: 8 8 0 0;
+    -fx-border-color: transparent -border transparent -border;
+    -fx-border-width: 2 1 0 1;
 }
 .custom-tab .label {
-    -fx-text-fill: #cccccc;
+    -fx-text-fill: -text-muted;
 }
 .custom-tab:hover {
-    -fx-background-color: #333333;
+    -fx-opacity: 0.9;
+    -fx-background-color: -bg-hover;
 }
 .custom-tab:hover .label {
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: -text-primary;
 }
 .custom-tab.selected {
-    -fx-background-color: #1e1e1e;
-    -fx-border-color: #007acc transparent transparent transparent;
-    -fx-border-width: 2px 0 0 0;
+    -fx-background-color: -bg-base;
+    -fx-opacity: 1.0;
+    -fx-border-color: -accent-bright -border transparent -border;
+    -fx-border-width: 2 1 0 1;
+    -fx-effect: none;
 }
 .custom-tab.selected .label {
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: -accent-bright;
     -fx-font-weight: bold;
 }
 .custom-tab .close-btn {
@@ -540,11 +559,20 @@
     -fx-cursor: hand;
 }
 .custom-tab .close-btn .svg-icon {
-    -fx-fill: #969696;
+    -fx-fill: transparent;
+}
+.custom-tab:hover .close-btn .svg-icon {
+    -fx-fill: -text-secondary;
+}
+.custom-tab.selected .close-btn .svg-icon {
+    -fx-fill: -text-primary;
 }
 .custom-tab .close-btn:hover {
-    -fx-background-color: #444444;
-    -fx-background-radius: 3px;
+    -fx-background-color: -danger;
+    -fx-background-radius: 4px;
+}
+.custom-tab .close-btn:hover .svg-icon {
+    -fx-fill: white;
 }
 .editor-tabs-hidden .tab-header-area {
     visibility: hidden;
@@ -673,7 +701,7 @@
 
 .editor-area {
     -fx-background-color: -bg-base;
-    -fx-padding: 6 18 1 12;
+    -fx-padding: 4 18 1 8;
     -fx-font-size: 13px;
 }
 
@@ -698,22 +726,26 @@
 }
 
 .scroll-bar {
-    -fx-background-color: -bg-panel;
+    -fx-background-color: transparent;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: -bg-highlight;
-    -fx-background-radius: 4;
+    -fx-background-color: rgba(120, 120, 120, 0.3);
+    -fx-background-radius: 6px;
+    -fx-background-insets: 2px;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: -text-muted;
+    -fx-background-color: rgba(120, 120, 120, 0.6);
 }
 
 .scroll-bar .increment-button,
-.scroll-bar .decrement-button {
+.scroll-bar .decrement-button,
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: null;
     -fx-background-color: transparent;
-    -fx-padding: 2;
 }
 
 /* ─── Welcome Pane ───────────────────────────────────────── */
@@ -722,7 +754,6 @@
 }
 
 .welcome-container {
-    -fx-max-width: 600px;
 }
 
 .welcome-logo {
@@ -796,6 +827,38 @@
     -fx-border-color: -border-bright;
     -fx-border-width: 1;
     -fx-border-radius: 4;
+}
+
+.welcome-action-btn {
+    -fx-background-color: -accent-dim;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+}
+.welcome-action-btn:hover {
+    -fx-background-color: -accent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+}
+
+.welcome-shortcut-pill {
+    -fx-background-color: transparent;
+    -fx-text-fill: -text-primary;
+    -fx-font-family: "JetBrains Mono", monospace;
+    -fx-font-size: 13px;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 20;
+    -fx-border-color: -border-bright;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+}
+
+.welcome-divider-horizontal {
+    -fx-background-color: -border;
+    -fx-padding: 0 0 1 0;
 }
 
 /* ─── Status Bar ─────────────────────────────────────────── */
@@ -1156,10 +1219,11 @@
 
 .editor-split>.split-pane-divider {
     -fx-padding: 4 0 4 0;
+    -fx-background-color: transparent;
 }
 
 .editor-split>.split-pane-divider:hover {
-    -fx-background-color: -accent-dim;
+    -fx-background-color: -accent-glow;
 }
 
 .console-panel {

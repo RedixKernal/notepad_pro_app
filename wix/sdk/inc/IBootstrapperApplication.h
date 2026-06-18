@@ -511,7 +511,7 @@ DECLARE_INTERFACE_IID_(IBootstrapperApplication, IUnknown, "53C31D56-49C0-426B-A
     //
     //  All other return codes result in an error.
     //
-    // Notepad_Pro:
+    // Notes:
     //  It is expected the BA may call IBurnCore::SetLocalSource() or IBurnCore::SetDownloadSource()
     //  to update the source location before returning IDRETRY or IDDOWNLOAD.
     STDMETHOD_(int, OnResolveSource)(

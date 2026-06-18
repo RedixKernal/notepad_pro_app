@@ -47,11 +47,11 @@ public class MainApp extends Application {
         com.ravi.notesapp.model.AppSettings settings = settingsService.getSettings();
 
         Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
-        double defaultWidth = Math.max(800, Math.min(1280, screenBounds.getWidth() * 0.85));
-        double defaultHeight = Math.max(500, Math.min(800, screenBounds.getHeight() * 0.85));
+        double defaultWidth = Math.max(600, Math.min(820, screenBounds.getWidth() * 0.85));
+        double defaultHeight = Math.max(400, Math.min(480, screenBounds.getHeight() * 0.85));
 
-        double width = settings.getWindowWidth() > 0 ? settings.getWindowWidth() : defaultWidth;
-        double height = settings.getWindowHeight() > 0 ? settings.getWindowHeight() : defaultHeight;
+        double width = defaultWidth;
+        double height = defaultHeight;
         Scene scene = new Scene(root, width, height);
 
         // Apply system default theme
@@ -66,8 +66,8 @@ public class MainApp extends Application {
 
         stage.setTitle(APP_NAME);
         stage.setScene(scene);
-        stage.setMinWidth(800);
-        stage.setMinHeight(500);
+        stage.setMinWidth(Math.min(600, screenBounds.getWidth()));
+        stage.setMinHeight(Math.min(400, screenBounds.getHeight()));
 
         // Pass command line arguments (e.g. from Open With) to the controller
         com.ravi.notesapp.controller.MainController controller = loader.getController();

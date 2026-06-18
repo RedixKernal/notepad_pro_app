@@ -28,48 +28,13 @@
                     </items>
                 </MenuButton>
 
-                <!-- <ToggleButton fx:id="btnToggleSidebar" onAction="#onToggleSidebar" styleClass="toolbar-btn">
-                    <tooltip>
-                        <Tooltip text="Toggle Sidebar (Ctrl+B)"/>
-                    </tooltip>
-                    <graphic>
-                        <SVGPath content="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h4V6H4z M0 0 H0.01 M24 24 H23.99" styleClass="svg-icon"/>
-                    </graphic>
-                </ToggleButton>
-                <Separator orientation="VERTICAL"/> -->
-
-                <!-- <Button fx:id="btnOpen" text="Open" onAction="#onOpenFolder" styleClass="toolbar-btn" graphicTextGap="4">
-                    <tooltip>
-                        <Tooltip text="Open Folder (Ctrl+O)"/>
-                    </tooltip>
-                    <graphic>
-                        <SVGPath content="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z M0 0 H0.01 M24 24 H23.99" styleClass="svg-icon"/>
-                    </graphic>
-                </Button> -->
-
                 <Button fx:id="btnSave" text="Save" onAction="#onSave" styleClass="toolbar-btn" graphicTextGap="4">
                     <tooltip>
                         <Tooltip text="Save Active File (Ctrl+S)"/>
                     </tooltip>
                 </Button>
 
-                <!-- <Button fx:id="btnNewFile" text="New File" onAction="#onNewFile" styleClass="toolbar-btn" graphicTextGap="4">
-                    <tooltip>
-                        <Tooltip text="New File (Ctrl+N)"/>
-                    </tooltip>
-                    <graphic>
-                        <SVGPath content="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z M0 0 H0.01 M24 24 H23.99" styleClass="svg-icon"/>
-                    </graphic>
-                </Button> -->
 
-                <!-- <Button fx:id="btnNewDir" text="New Folder" onAction="#onNewFolder" styleClass="toolbar-btn" graphicTextGap="4">
-                    <tooltip>
-                        <Tooltip text="New Folder (Ctrl+Shift+N)"/>
-                    </tooltip>
-                    <graphic>
-                        <SVGPath content="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2zm8 10h-3v3h-2v-3h-3v-2h3V9h2v3h3v2z M0 0 H0.01 M24 24 H23.99" styleClass="svg-icon"/>
-                    </graphic>
-                </Button> -->
 
                 <Button fx:id="btnDelete" text="Delete" onAction="#onDelete" styleClass="toolbar-btn" graphicTextGap="4">
                     <tooltip>
@@ -118,8 +83,6 @@
     <center>
         <SplitPane fx:id="splitPane" dividerPositions="0.22" styleClass="main-split">
 
-            <!-- LEFT: Explorer panel -->
-            <!-- <fx:include fx:id="explorerPane" source="explorer.fxml"/> -->
 
             <!-- RIGHT: Editor panel -->
             <fx:include fx:id="editorPane" source="editor.fxml"/>

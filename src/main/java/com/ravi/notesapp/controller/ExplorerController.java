@@ -270,17 +270,6 @@ public class ExplorerController implements Initializable {
             fileTree.getRoot().setExpanded(true);
     }
 
-    // @FXML
-    // void onToggleTree(ActionEvent e) {
-    // boolean visible = btnToggleTree.isSelected();
-    // fileTree.setVisible(visible);
-    // fileTree.setManaged(visible);
-    // btnToggleTree.setText(visible ? "📂" : "📁");
-    // Tooltip tooltip = btnToggleTree.getTooltip();
-    // if (tooltip != null) {
-    // tooltip.setText(visible ? "Hide File Tree" : "Show File Tree");
-    // }
-    // }
 
     // ──────────────── Search / Filter ─────────────────────────────────────
 

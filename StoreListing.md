@@ -5,7 +5,7 @@
 **Key Features:**
 *   **AI Assistant:** Instantly analyze, summarize, or generate code right from your active tab.
 *   **Multi-Tab Editing:** Effortlessly juggle multiple documents simultaneously.
-*   **Built-in File Explorer:** Manage your project files without ever leaving the app.
+*   **Seamless File Management:** Easily create, open, update, and delete files directly within the editor.
 *   **Universal Syntax Support:** Compile and execute over 50 programming languages.
 *   **Command Palette:** Lightning-fast access to files and tools using keyboard shortcuts.
 *   **Auto-Save & Deep Search:** Never lose your progress, and find exactly what you need instantly.
@@ -14,8 +14,10 @@
 
 **Version 2.0.0**
 *   **[New] AI Assistant Integration:** Interact with advanced AI models directly within your editor. Use the context of your current file to ask questions, debug code, or generate text seamlessly.
+*   **[New] Modern UI Refinements:** Enjoy beautiful, realistic pill-shaped tabs with distinct active and inactive states for a smooth, Chrome/Windows 11-inspired user experience.
+*   **[New] Enhanced Installer:** A seamless MSI installer featuring publisher verification (Redix Systems), a built-in AI Usage Restriction Policy EULA, auto-launch support, and an optional anonymous diagnostic reporting feature.
 *   **[Improved] Performance Boost:** Enhanced window responsiveness and improved memory management for large files.
-*   **[Fixed] UI/UX Refinements:** Addressed minor rendering glitches in Dark Mode, resolved the auto-scroll flickering issue, and improved dialog box placements for a smoother experience.
+*   **[Fixed] UI/UX Refinements:** Addressed minor rendering glitches in Dark Mode, optimized left and top layout spacing, and improved dialog box placements for a smoother experience.
 
 ---
 
@@ -38,7 +40,7 @@ By acquiring and using Notepad Pro, you agree to the Standard Application Licens
 Notepad Pro is a traditional desktop application that has been packaged for distribution through the Microsoft Store. As a comprehensive code editor and development environment, the application requires the `runFullTrust` capability to perform its core functions. 
 
 Specifically, this capability is used for:
-1.  **Unrestricted File System Access:** To provide the built-in file explorer and allow users to open, edit, save, and manage files and complex project directories from arbitrary locations on their hard drive without being hindered by the AppContainer sandbox file picker restrictions.
+1.  **Unrestricted File System Access:** To allow users to directly open, edit, save, create, and manage files from arbitrary locations on their hard drive without being hindered by the AppContainer sandbox file picker restrictions.
 2.  **Process Execution:** To support the "Universal Syntax Support" feature. The application needs to break out of the sandbox to spawn external processes and invoke local toolchains (such as compilers, interpreters, and debuggers like Python, Node.js, or GCC) installed on the user's system to compile and execute user code. 
 
 Without `runFullTrust`, Notepad Pro's core file management and code execution features would be rendered entirely non-functional.

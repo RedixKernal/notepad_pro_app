@@ -31,7 +31,7 @@ Notepad Pro includes an optional AI Assistant feature that allows you to interac
 
 ### 3. Analytics and Telemetry
 
-We do not collect personal usage data, telemetry, or crash reports. Notepad Pro does not track your behavior or monitor how you use the Application.
+By default, Notepad Pro does not collect personal usage data, telemetry, or crash reports. However, during installation, users have the option to opt-in to "Send Diagnostic Data". If you choose to opt-in, anonymous usage statistics and crash reports sent to Redix Systems to help improve the application. This feature is strictly optional.
 
 ### 4. Children's Privacy
 

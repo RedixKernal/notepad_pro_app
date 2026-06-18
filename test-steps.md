@@ -4,7 +4,7 @@ This document provides step-by-step instructions and required disclosures for Mi
 
 ## 1. General Application Overview
 
-Notepad Pro is a lightweight, local text editor designed for developers and power users, featuring syntax highlighting, local file browsing, and an optional integrated AI Assistant.
+Notepad Pro is a lightweight, local text editor designed for developers and power users, featuring syntax highlighting, robust file management, and an optional integrated AI Assistant.
 
 ## 2. Test Accounts and Credentials
 
@@ -30,11 +30,12 @@ This application is a text editor. It does not play background audio, nor does i
 
 Please follow these steps to verify the primary functionality of the application:
 
-1. **Launch the App:** Open Notepad Pro from the Start Menu.
-2. **Create a File:** Click on the "New File" icon in the top toolbar or press `Ctrl+N`. Type some text into the editor pane.
-3. **Save the File:** Click the "Save" icon or press `Ctrl+S`. Choose a local directory on your device to save the `.txt` or code file.
-4. **File Explorer:** Use the left sidebar to navigate your local file system. Double-click any text file to open it in a new tab.
-5. **Theme Switching:** Click the "Toggle Theme" (sun/moon) icon in the top right header to seamlessly switch between Light Mode and Dark Mode.
+1. **Install the App:** Run the provided `.msi` installer. Verify the Publisher displays as "Redix Systems". Progress through the setup, ensuring the "AI Usage Restriction Policy" is visible in the EULA. Choose whether to opt-in to "Send Diagnostic Data" in the feature tree. Finally, verify the "Launch Notepad_Pro" checkbox is available on the finish screen.
+2. **Launch the App:** If not auto-launched, open Notepad Pro from the Start Menu.
+3. **Create a File:** Click on the "New File" icon in the top toolbar or press `Ctrl+N`. Type some text into the editor pane.
+4. **Save the File:** Click the "Save" icon or press `Ctrl+S`. Choose a local directory on your device to save the `.txt` or code file.
+5. **File Management & Tabs:** Open a text file to load it in a new tab. Verify the modern, pill-shaped tabs correctly highlight the active document.
+6. **Theme Switching:** Click the "Toggle Theme" (sun/moon) icon in the top right header to seamlessly switch between Light Mode and Dark Mode.
 
 ## 7. Steps to Access Conditional Content (AI Assistant)
 
