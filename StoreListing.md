@@ -17,6 +17,9 @@
 *   **[New] Modern UI Refinements:** Enjoy beautiful, realistic pill-shaped tabs with distinct active and inactive states for a smooth, Chrome/Windows 11-inspired user experience.
 *   **[New] Enhanced Installer:** A seamless MSI installer featuring publisher verification (Redix Systems), a built-in AI Usage Restriction Policy EULA, auto-launch support, and an optional anonymous diagnostic reporting feature.
 *   **[Improved] Performance Boost:** Enhanced window responsiveness and improved memory management for large files.
+*   **[Fixed] MSIX Sandboxing Permissions:** Resolved permission denied errors by ensuring AI audit logs are correctly saved to the user's local application data directory.
+*   **[Fixed] Application Exit Handling:** Eliminated zombie processes and hanging JVMs by ensuring all child processes are forcefully terminated upon closing the app.
+*   **[Fixed] Window State Persistence:** Fixed an issue where saved window dimensions (width and height) were ignored on startup, ensuring your workspace size is accurately restored.
 *   **[Fixed] UI/UX Refinements:** Addressed minor rendering glitches in Dark Mode, optimized left and top layout spacing, and improved dialog box placements for a smoother experience.
 
 ---
